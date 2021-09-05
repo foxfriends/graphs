@@ -1,0 +1,2 @@
+#!/bin/bash
+deno run -A --unstable https://deno.land/x/nessie@2.0.1/cli.ts $@
