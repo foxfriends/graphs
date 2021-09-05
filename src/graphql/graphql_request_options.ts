@@ -1,4 +1,4 @@
 export interface GraphQLRequestOptions {
-  operationName?: Record<string, unknown>;
+  operationName?: string;
   variables?: Record<string, unknown>;
 }

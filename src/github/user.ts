@@ -1,4 +1,4 @@
 export interface User {
   login: string;
-  avatarUrl?: string;
+  avatarUrl: string;
 }

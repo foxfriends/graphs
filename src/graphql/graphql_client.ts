@@ -2,9 +2,9 @@ import type { GraphQLResult } from "./graphql_result.ts";
 import type { GraphQLRequestOptions } from "./graphql_request_options.ts";
 
 export class GraphQLClient {
-  constructor(private url: string, private options: object) {}
+  constructor(private url: string, private options: RequestInit) {}
 
-  private mergeOptions(options: object): object {
+  private mergeOptions(options: RequestInit): object {
     return {
       ...this.options,
       ...options,
@@ -17,13 +17,14 @@ export class GraphQLClient {
 
   async get<T>(
     query: string,
-    options?: GraphQLRequestOptions,
-  ): GraphQLResult<T> {
-    const search = new URLSearchParams({
-      query,
-      operationName: options?.operationName,
-      variables: options?.variables && JSON.stringify(options.variables),
-    });
+    options: GraphQLRequestOptions = {},
+  ): Promise<GraphQLResult<T>> {
+    const params: Record<string, string> = { query };
+    if (options.operationName) params.operationName = options.operationName;
+    if (options.variables) {
+      params.operationName = JSON.stringify(options.variables);
+    }
+    const search = new URLSearchParams(params);
     const url = new URL(this.url);
     url.search = search.toString();
     const response = await fetch(
@@ -37,16 +38,16 @@ export class GraphQLClient {
 
   async post<T>(
     query: string,
-    options?: GraphQLRequestOptions,
-  ): GraphQLResult<T> {
+    options: GraphQLRequestOptions = {},
+  ): Promise<GraphQLResult<T>> {
     const response = await fetch(
       this.url,
       this.mergeOptions({
         method: "POST",
         body: JSON.stringify({
           query,
-          operationName: options?.operationName,
-          variables: options?.variables,
+          operationName: options.operationName,
+          variables: options.variables,
         }),
         headers: { "Content-Type": "application/json" },
       }),

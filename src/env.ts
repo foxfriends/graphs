@@ -1,4 +1,4 @@
-import { config } from "https://deno.land/x/dotenv@v3.0.0/mod.ts";
+import { config } from "./deps/dotenv.ts";
 
 function int(str: string): number {
   const value = parseInt(str);

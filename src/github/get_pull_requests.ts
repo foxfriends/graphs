@@ -1,20 +1,24 @@
-import { cond, prop, propEq } from "../deps/ramda.ts";
+import { complement, cond, path, prop, propEq, propOr } from "../deps/ramda.ts";
+import { graphql, GraphQLError } from "../graphql/mod.ts";
 import { GithubAPI } from "./client.ts";
-import { graphql } from "../graphql/mod.ts";
 import { paginate } from "./paginate.ts";
 import { mapResult } from "../graphql/graphql_result.ts";
-import type { Repository } from "./repository.ts";
+import { ApiError } from "./api_error.ts";
 import type { PullRequest } from "./pull_request.ts";
+import type { Repository } from "./repository.ts";
 
 const QUERY = graphql`
   query GetPullRequests($name: String!, $owner: String!, $after: String) {
     repository(name: $name, owner: $owner) {
       pullRequests(after: $after, first: 100) {
         nodes {
-          databaseId
-          author { login }
+          number
+          author {
+            __typename
+            login
+          }
           title
-          reviewRequests {
+          reviewRequests(first: 100) {
             nodes {
               requestedReviewer {
                 __typename
@@ -39,7 +43,9 @@ const QUERY = graphql`
 
 const typenameIs = propEq("__typename");
 
-export function getPullRequests(owner: string, repository: string): PullRequest[] {
+export async function getPullRequests(
+  repository: Repository,
+): Promise<PullRequest[]> {
   const results = await paginate(
     path(["repository", "pullRequests", "pageInfo"]),
     ({ after }) =>
@@ -52,23 +58,28 @@ export function getPullRequests(owner: string, repository: string): PullRequest[
       }),
   );
 
-  const errors = results.flatMap(prop("errors"));
-  if (errors) throw new Error(errors);
-  return results.flatMap(({ data }) =>
+  const errors: GraphQLError[] = results
+    .flatMap(propOr([], "errors"));
+  if (errors.length) throw new ApiError(errors);
+  return results.flatMap(({ data }: any) =>
     data
+      .repository
       .pullRequests
       .nodes
-      .map((pullRequest) => ({
-        id: pullRequest.databaseId,
+      .filter(({ author }: any) => author.__typename !== 'Bot')
+      .map((pullRequest: any) => ({
+        id: pullRequest.number,
         title: pullRequest.title,
         author: pullRequest.author.login,
-        reviewers: reviewRequests
+        reviewers: pullRequest
+          .reviewRequests
           .nodes
           .map(prop("requestedReviewer"))
-          .flatMap(cond(
-            [typenameIs("User"), ({ login }) => [login]],
-            [typenameIs("Team"), ({ members }) => members.nodes.map("login")],
-          )),
+          .flatMap(cond([
+            [typenameIs("User"), ({ login }: any) => [login]],
+            [typenameIs("Team"), ({ members }: any) =>
+              members.nodes.map("login")],
+          ])),
       }))
-  );
+  ) as PullRequest[];
 }

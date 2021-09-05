@@ -7,7 +7,7 @@ export interface GraphQLResult<T> {
 }
 
 export const mapResult = curry(<T, U>(
-  transform: (T) => U,
+  transform: (data: T) => U,
   result: GraphQLResult<T>,
 ): GraphQLResult<U> => {
   if (result.data) {
@@ -16,5 +16,5 @@ export const mapResult = curry(<T, U>(
       data: transform(result.data),
     };
   }
-  return result;
+  return result as any as GraphQLResult<U>;
 });

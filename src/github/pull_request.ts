@@ -6,3 +6,7 @@ export interface PullRequest {
   author: string;
   reviewers: string[];
 }
+
+export function associatedUsers(pr: PullRequest): string[] {
+  return [pr.author, ...pr.reviewers];
+}

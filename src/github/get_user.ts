@@ -1,22 +1,25 @@
 import { assoc } from "../deps/ramda.ts";
-import { mapResult } from "../graphql/graphql_result.ts";
-import { GithubAPI, graphql, GraphQLResult } from "./client.ts";
+import { graphql } from "../graphql/mod.ts";
+import { GraphQLResult, mapResult } from "../graphql/graphql_result.ts";
+import { GithubAPI } from "./client.ts";
+import { ApiError } from "./api_error.ts";
 import type { User } from "./user.ts";
 
 const QUERY = graphql`
   query GetUser($login: String!) {
     user(login: $login) {
+      login
       avatarUrl
     }
   }
 `;
 
-export function getUser(login: string): User {
+export async function getUser(login: string): Promise<User> {
   const { data, errors } = await GithubAPI.post(QUERY, {
     variables: { login },
   });
-  if (errors) throw new Error(errors);
-  return { ...data, login };
+  if (errors) throw new ApiError(errors);
+  return data as User;
 }
 
 export type { GraphQLResult };

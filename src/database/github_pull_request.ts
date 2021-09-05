@@ -1,0 +1,37 @@
+import type { Transaction } from "../deps/postgres.ts";
+import type { GithubRepository } from "./github_repository.ts";
+
+export type GithubPullRequest = {
+  id: number;
+  repositoryOwner: string;
+  repositoryName: string;
+  title: string;
+  author: string;
+};
+
+export async function getPullRequestById(
+  db: Transaction,
+  repository: GithubRepository,
+  id: number,
+): Promise<GithubPullRequest | null> {
+  const result = await db.queryObject<GithubPullRequest>`
+    SELECT id, repository_owner as "repositoryOwner", repository_name as "repositoryName", title, author
+      FROM github_pull_requests
+      WHERE repository_owner = ${repository.owner}
+        AND repository_name = ${repository.name}
+        AND id = ${id}
+  `;
+  return result?.rows?.[0] ?? null;
+}
+
+export async function savePullRequest(
+  db: Transaction,
+  pullRequest: GithubPullRequest,
+): Promise<void> {
+  await db.queryArray`
+    INSERT INTO github_pull_requests (id, repository_owner, repository_name, title, author)
+      VALUES (${pullRequest.id}, ${pullRequest.repositoryOwner}, ${pullRequest.repositoryName}, ${pullRequest.title}, ${pullRequest.author})
+      ON CONFLICT (repository_owner, repository_name, id) DO UPDATE
+      SET title = ${pullRequest.title}, author = ${pullRequest.author}
+  `;
+}
