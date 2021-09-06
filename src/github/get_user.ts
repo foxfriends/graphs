@@ -14,12 +14,16 @@ const QUERY = graphql`
   }
 `;
 
+type Response = {
+  user: User;
+};
+
 export async function getUser(login: string): Promise<User> {
-  const { data, errors } = await GithubAPI.post(QUERY, {
+  const { data, errors } = await GithubAPI.post<Response>(QUERY, {
     variables: { login },
   });
   if (errors) throw new ApiError(errors);
-  return data as User;
+  return data!.user;
 }
 
 export type { GraphQLResult };

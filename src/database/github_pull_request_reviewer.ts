@@ -1,3 +1,4 @@
+import logger from "../logger.ts";
 import type { Transaction } from "../deps/postgres.ts";
 import type { GithubPullRequest } from "./github_pull_request.ts";
 
@@ -26,6 +27,7 @@ export async function savePullRequestReviewer(
   db: Transaction,
   reviewer: GithubPullRequestReviewer,
 ): Promise<void> {
+  logger.debug("savePullRequestReviewer", reviewer);
   await db.queryArray`
     INSERT INTO github_pull_request_reviewers (pull_request_id, repository_owner, repository_name, reviewer)
       VALUES (${reviewer.pullRequestId}, ${reviewer.repositoryOwner}, ${reviewer.repositoryName}, ${reviewer.reviewer})

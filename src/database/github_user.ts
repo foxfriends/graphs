@@ -1,3 +1,4 @@
+import logger from "../logger.ts";
 import type { Transaction } from "../deps/postgres.ts";
 
 export type GithubUser = {
@@ -21,6 +22,7 @@ export async function saveUser(
   db: Transaction,
   user: GithubUser,
 ): Promise<void> {
+  logger.debug("saveUser", user);
   await db.queryArray`
     INSERT INTO github_users (login, avatar_url)
       VALUES (${user.login}, ${user.avatarUrl})

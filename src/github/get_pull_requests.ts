@@ -66,7 +66,7 @@ export async function getPullRequests(
       .repository
       .pullRequests
       .nodes
-      .filter(({ author }: any) => author.__typename !== 'Bot')
+      .filter(typenameIs("User"))
       .map((pullRequest: any) => ({
         id: pullRequest.number,
         title: pullRequest.title,

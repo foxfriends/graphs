@@ -14,7 +14,7 @@ export default class extends AbstractMigration<ClientPostgreSQL> {
     await transaction.queryArray`
       CREATE TABLE github_users (
         login         VARCHAR(39) PRIMARY KEY,
-        avatarUrl     TEXT
+        avatar_url    TEXT NOT NULL
       )
     `;
     await transaction.queryArray`
