@@ -66,7 +66,7 @@ export async function getPullRequests(
       .repository
       .pullRequests
       .nodes
-      .filter(typenameIs("User"))
+      .filter(({ author }: any) => typenameIs("User", author))
       .map((pullRequest: any) => ({
         id: pullRequest.number,
         title: pullRequest.title,
