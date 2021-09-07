@@ -1,13 +1,16 @@
-import { setup, FileHandler, ConsoleHandler, getLogger } from "./deps/log.ts";
-import { LOG_LEVEL, LOG_FILE } from "./env.ts";
+import { ConsoleHandler, FileHandler, getLogger, setup } from "./deps/log.ts";
+import { LOG_FILE, LOG_LEVEL } from "./env.ts";
 
 // NOTE: could not find BaseHandler as a type, so just going with any for now
 const handlers: Record<string, any> = {
   console: new ConsoleHandler(LOG_LEVEL, {
     formatter: (logRecord) => {
-      const args = logRecord.args.map((arg) => JSON.stringify(arg, null, 2)).join('\n');
-      return `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${logRecord.msg}\n${args}`;
-    }
+      const args = logRecord.args.map((arg) => JSON.stringify(arg, null, 2));
+      return [
+        `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${logRecord.msg}`,
+        ...args,
+      ].join("\n");
+    },
   }),
 };
 
@@ -15,7 +18,7 @@ if (LOG_FILE) {
   handlers.file = new FileHandler(LOG_LEVEL, {
     filename: LOG_FILE,
     formatter: (logRecord) => JSON.stringify(logRecord),
-    mode: 'w',
+    mode: "w",
   });
 }
 

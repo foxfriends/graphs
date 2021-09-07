@@ -46,6 +46,17 @@ export default class extends AbstractMigration<ClientPostgreSQL> {
         FOREIGN KEY (repository_owner, repository_name) REFERENCES github_repositories (owner, name) ON DELETE CASCADE
       )
     `;
+    await transaction.queryArray`
+      CREATE TABLE github_pull_request_suggested_reviewers (
+        pull_request_id  INT NOT NULL,
+        repository_owner VARCHAR(39) NOT NULL REFERENCES github_users (login) ON DELETE CASCADE,
+        repository_name  VARCHAR(100) NOT NULL,
+        reviewer         VARCHAR(39) NOT NULL REFERENCES github_users (login) ON DELETE CASCADE,
+        PRIMARY KEY (pull_request_id, repository_owner, repository_name, reviewer),
+        FOREIGN KEY (pull_request_id, repository_owner, repository_name) REFERENCES github_pull_requests (id, repository_owner, repository_name) ON DELETE CASCADE,
+        FOREIGN KEY (repository_owner, repository_name) REFERENCES github_repositories (owner, name) ON DELETE CASCADE
+      )
+    `;
     await transaction.commit();
   }
 
@@ -55,6 +66,8 @@ export default class extends AbstractMigration<ClientPostgreSQL> {
       "github_pull_requests_reviewers_down",
     );
     await transaction.begin();
+    await transaction.queryArray
+      `DROP TABLE github_pull_request_suggested_reviewers`;
     await transaction.queryArray`DROP TABLE github_pull_request_reviewers`;
     await transaction.queryArray`DROP TABLE github_pull_requests`;
     await transaction.queryArray`DROP TABLE github_repositories`;
