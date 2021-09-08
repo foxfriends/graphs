@@ -1,8 +1,5 @@
 import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from "./src/env.ts";
-import {
-  ClientPostgreSQL,
-  NessieConfig,
-} from "https://deno.land/x/nessie@2.0.1/mod.ts";
+import { ClientPostgreSQL, NessieConfig } from "nessie";
 
 const client = new ClientPostgreSQL({
   database: PGDATABASE,
