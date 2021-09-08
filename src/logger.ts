@@ -19,7 +19,7 @@ const handlers: Record<string, any> = {
 if (LOG_FILE) {
   handlers.file = new FileHandler("DEBUG", {
     filename: LOG_FILE,
-    formatter: (logRecord) => JSON.stringify(logRecord),
+    formatter: (logRecord) => JSON.stringify({ ...logRecord, args: logRecord.args }),
     mode: "w",
   });
 }
