@@ -34,7 +34,6 @@ export async function getRepository(
       owner: repository.owner,
     },
   });
-  console.log(errors);
   if (errors?.length) throw new ApiError(errors);
   return data!.repository;
 }

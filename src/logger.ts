@@ -17,7 +17,7 @@ const handlers: Record<string, any> = {
 };
 
 if (LOG_FILE) {
-  handlers.file = new FileHandler(LOG_LEVEL, {
+  handlers.file = new FileHandler("DEBUG", {
     filename: LOG_FILE,
     formatter: (logRecord) => JSON.stringify(logRecord),
     mode: "w",
@@ -28,7 +28,7 @@ await setup({
   handlers,
   loggers: {
     default: {
-      level: LOG_LEVEL,
+      level: "DEBUG",
       handlers: Object.keys(handlers),
     },
   },
