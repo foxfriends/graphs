@@ -1,15 +1,15 @@
-import { transaction } from "../database/mod.ts";
-import { savePullRequest } from "../database/github_pull_request.ts";
+import { transaction } from "$lib/database/transaction.ts";
+import { savePullRequest } from "$lib/database/github_pull_request.ts";
 import {
   GithubRepository,
   saveRepository,
-} from "../database/github_repository.ts";
-import { saveUser } from "../database/github_user.ts";
-import { savePullRequestReviewer } from "../database/github_pull_request_reviewer.ts";
-import { savePullRequestSuggestedReviewer } from "../database/github_pull_request_suggested_reviewer.ts";
-import { getPullRequests, getRepository, getUser } from "../github/mod.ts";
-import { associatedUsers } from "../github/pull_request.ts";
-import logger from "../logger.ts";
+} from "$lib/database/github_repository.ts";
+import { saveUser } from "$lib/database/github_user.ts";
+import { savePullRequestReviewer } from "$lib/database/github_pull_request_reviewer.ts";
+import { savePullRequestSuggestedReviewer } from "$lib/database/github_pull_request_suggested_reviewer.ts";
+import { getPullRequests, getRepository, getUser } from "$lib/github/mod.ts";
+import { associatedUsers } from "$lib/github/pull_request.ts";
+import logger from "$lib/logger.ts";
 
 export async function ghPrs(
   options: any,

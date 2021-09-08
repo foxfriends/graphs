@@ -1,4 +1,4 @@
-import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from "./db/env.ts";
+import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from "$lib/env.ts";
 import { ClientPostgreSQL, NessieConfig } from "nessie";
 
 const client = new ClientPostgreSQL({

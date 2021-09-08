@@ -1,12 +1,18 @@
 {
   "imports": {
     "~/": "./",
+    "$lib/": "../lib/",
     "aleph/": "https://deno.land/x/aleph@v0.3.0-beta.12/",
     "aleph/types": "https://deno.land/x/aleph@v0.3.0-beta.12/types.d.ts",
     "aleph/web": "https://deno.land/x/aleph@v0.3.0-beta.12/framework/core/mod.ts",
     "aleph/react": "https://deno.land/x/aleph@v0.3.0-beta.12/framework/react/mod.ts",
     "react": "https://esm.sh/react@17.0.2",
-    "react-dom": "https://esm.sh/react-dom@17.0.2"
+    "react-dom": "https://esm.sh/react-dom@17.0.2",
+    "d3": "https://esm.sh/d3@7.0.1",
+    "dotenv": "https://deno.land/x/dotenv@v3.0.0/mod.ts",
+    "log": "https://deno.land/std@0.106.0/log/mod.ts",
+    "postgres": "https://deno.land/x/postgres@v0.12.0/mod.ts",
+    "ramda": "https://deno.land/x/ramda@v0.27.2/mod.ts"
   },
   "scopes": {}
 }
