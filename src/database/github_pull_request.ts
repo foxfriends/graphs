@@ -1,5 +1,5 @@
+import type { Transaction } from "postgres";
 import logger from "../logger.ts";
-import type { Transaction } from "../deps/postgres.ts";
 import type { GithubRepository } from "./github_repository.ts";
 
 export type GithubPullRequest = {

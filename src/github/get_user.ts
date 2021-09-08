@@ -1,4 +1,4 @@
-import { assoc } from "../deps/ramda.ts";
+import { assoc } from "ramda";
 import { graphql } from "../graphql/mod.ts";
 import { GraphQLResult, mapResult } from "../graphql/graphql_result.ts";
 import { GithubAPI } from "./client.ts";

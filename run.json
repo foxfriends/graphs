@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "populate": "deno --unstable run --import-map=import_map.json --allow-net --allow-read --allow-env --allow-write src/main.ts",
+    "db:migrate": "deno --unstable run --import-map=import_map.json --allow-env --allow-read --allow-net https://deno.land/x/nessie@2.0.1/cli.ts migrate",
+    "db:rollback": "deno --unstable run --import-map=import_map.json --allow-env --allow-read --allow-write --allow-net https://deno.land/x/nessie@2.0.1/cli.ts rollback"
+  }
+}

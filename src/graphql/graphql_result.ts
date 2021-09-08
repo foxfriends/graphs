@@ -1,4 +1,4 @@
-import { curry } from "../deps/ramda.ts";
+import { curry } from "ramda";
 import type { GraphQLError } from "./graphql_error.ts";
 
 export interface GraphQLResult<T> {

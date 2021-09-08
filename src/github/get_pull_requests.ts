@@ -1,4 +1,4 @@
-import { complement, cond, path, prop, propEq, propOr } from "../deps/ramda.ts";
+import { complement, cond, path, prop, propEq, propOr } from "ramda";
 import { graphql, GraphQLError } from "../graphql/mod.ts";
 import { GithubAPI } from "./client.ts";
 import { paginate } from "./paginate.ts";

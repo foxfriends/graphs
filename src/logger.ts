@@ -1,5 +1,7 @@
-import { ConsoleHandler, FileHandler, getLogger, setup } from "./deps/log.ts";
+import { getLogger, setup, handlers as Handlers } from "log";
 import { LOG_FILE, LOG_LEVEL } from "./env.ts";
+
+const { ConsoleHandler, FileHandler, BaseHandler } = Handlers;
 
 // NOTE: could not find BaseHandler as a type, so just going with any for now
 const handlers: Record<string, any> = {

@@ -1,4 +1,4 @@
-import { Command } from "./deps/cliffy.ts";
+import { Command } from "cliffy";
 import { ghPrs } from "./commands/gh_prs.ts";
 
 const options = await new Command()

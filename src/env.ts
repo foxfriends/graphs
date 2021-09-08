@@ -1,5 +1,5 @@
-import type { LevelName } from "./deps/log.ts";
-import { config } from "./deps/dotenv.ts";
+import type { LevelName } from "log";
+import { config } from "dotenv";
 
 function int(str: string): number {
   const value = parseInt(str);

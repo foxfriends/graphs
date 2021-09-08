@@ -1,4 +1,4 @@
-import { Client } from "../deps/postgres.ts";
+import { Client } from "postgres";
 import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from "../env.ts";
 
 const client = new Client({

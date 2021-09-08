@@ -1,4 +1,4 @@
-import type { Transaction } from "../deps/postgres.ts";
+import type { Transaction } from "postgres";
 import { client } from "./client.ts";
 import logger from "../logger.ts";
 
