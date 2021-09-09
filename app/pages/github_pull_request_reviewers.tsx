@@ -1,76 +1,105 @@
 import { prop, whereEq } from "ramda";
-import React, { Fragment, useState, useCallback } from "react";
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 
 export default function GithubPullRequestReviewers() {
-  const [owner, setOwner] = useState("");
-  const [name, setName] = useState("");
+  const [repositories, setRepositories] = useState([]);
   const [data, setData] = useState();
 
-  const load = useCallback(async () => {
+  useEffect(async () => {
+    const response = await fetch("/api/github_repositories");
+    const { repositories } = await response.json();
+    setRepositories(repositories);
+  }, []);
+
+  const load = useCallback(async (repository) => {
     const url = new URL("/api/github_pull_request_reviewers", window.location.origin);
-    url.search = new URLSearchParams({ owner, name }).toString();
+    url.search = new URLSearchParams(repository).toString();
     const response = await fetch(url);
     if (response.status !== 200) {
       return;
     }
     setData(await response.json());
-  }, [owner, name]);
+  }, []);
 
   const ref = useD3((svg) => {
     if (!data) { return; }
 
     svg.selectAll("*").remove();
 
-    const { height, width } = svg.node().getBoundingClientRect();
-    const margin = { left: 100 };
+    const { height } = svg.node().getBoundingClientRect();
+    const margin = { left: 200 };
+    const pointWidth = 2;
+    const ids = data.pullRequests.map(prop("id")).sort();
+    const width = ids.length * (pointWidth + 1) + margin.left;
+
+    svg.attr("width", width);
 
     const userOrder = Object.fromEntries(data
       .users
       .map(({ login }) => [login, Math.min(...data
         .reviewers
         .filter(whereEq({ reviewer: login }))
-        .map(prop('pullRequestId')))]));
+        .map(prop("pullRequestId")))]));
 
     const sortedUsers = data
       .users
-      .map(prop('login'))
+      .map(prop("login"))
       .sort((a, b) => userOrder[a] - userOrder[b]);
 
     const y = d3
       .scaleBand()
       .domain(sortedUsers)
       .range([0, height]);
-
     const x = d3
-      .scaleLinear()
-      .domain(d3.extent(data.pullRequests, (d) => d.id))
-      .range([0, width]);
+      .scaleBand()
+      .domain(ids)
+      .range([margin.left, width]);
+
+    const avatarSize = Math.min(75, y.bandwidth());
 
     const yAxis = (g) => g
-      .attr("transform", `translate(${margin.left},0)`)
+      .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y))
-      .call((g) => g.append("image")
-        .attr("x", -Math.min(50, y.bandwidth()))
-        .attr("y", (d) => y(d))
-        .attr("width", Math.min(50, y.bandwidth()))
-        .attr("height", Math.min(50, y.bandwidth()))
-        .attr("href", (d) => data.users.find(whereEq({ login: d })).avatarUrl)
-      .call((g) => g.append("text")
-        .attr("x", -margin.left)
-        .attr("y", y.bandwidth() / 2)
-        .text((d) => d));
+      .call((g) => g.selectAll("text").remove())
+      .call((g) => g
+        .selectAll(".tick")
+        .data(sortedUsers)
+        .append("g")
+        .call((g) => g
+          .append("image")
+          .attr("x", -avatarSize - 10)
+          .attr("y", -avatarSize / 2)
+          .attr("width", avatarSize)
+          .attr("height", avatarSize)
+          .attr("xlink:href", (d) => data.users.find(whereEq({ login: d }))?.avatarUrl))
+        .call((g) => g
+          .append("text")
+          .attr("fill", "black")
+          .attr("x", -avatarSize - 20)
+          .attr("transform", "translate(-100%, 50%)")
+          .text((d) => d)));
 
     svg.append("g")
-      .attr("fill", "green")
+      .attr("fill", "#3db843")
       .selectAll("rect")
       .data(data.reviewers)
       .join("rect")
-        .attr("width", 1)
+        .attr("width", pointWidth)
         .attr("height", y.bandwidth())
-        .attr("x", (d) => margin.left + d.pullRequestId)
+        .attr("x", (d) => x(d.pullRequestId))
         .attr("y", (d) => y(d.reviewer));
+
+    svg.append("g")
+      .attr("fill", "#f5faed")
+      .selectAll("rect")
+      .data(data.pullRequests)
+      .join("rect")
+        .attr("width", pointWidth)
+        .attr("height", y.bandwidth())
+        .attr("x", (d) => x(d.id))
+        .attr("y", (d) => y(d.author));
 
     svg.append("g").call(yAxis);
   }, [data]);
@@ -88,10 +117,11 @@ export default function GithubPullRequestReviewers() {
         .viewport {
           flex-basis: 0;
           flex-grow: 1;
+          overflow-x: auto;
+          overflow-y: hidden;
         }
 
         .graph {
-          width: 100%;
           height: 100%;
         }
 
@@ -99,7 +129,9 @@ export default function GithubPullRequestReviewers() {
           display: flex;
           flex-direction: column;
           gap: 16px;
-          flex-basis: 220px;
+          padding: 0 16px;
+          text-align: center;
+          border-left: 1px solid black;
         }
       `}</style>
       <div className="layout">
@@ -108,11 +140,13 @@ export default function GithubPullRequestReviewers() {
         </main>
         <aside className="settings">
           <h1>Repository</h1>
-          <input name="Owner" placeholder="Owner" defaultValue={owner} onChange={(event) => setOwner(event.target.value)} />
-          <input name="Name" placeholder="Name" defaultValue={name} onChange={(event) => setName(event.target.value)} />
-          <button onClick={load}>
-            Load
-          </button>
+          {
+            repositories.map((repository) =>
+              <button onClick={() => load(repository)} key={`${repository.owner}/${repository.name}`}>
+                {repository.owner}/{repository.name}
+              </button>
+            )
+          }
         </aside>
       </div>
     </Fragment>

@@ -10,4 +10,6 @@ const pool = new Pool({
   password: PGPASSWORD,
 }, 2);
 
-export function connect() { return pool.connect(); }
+export function connect() {
+  return pool.connect();
+}

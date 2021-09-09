@@ -3,16 +3,16 @@ import { prop } from "ramda";
 
 export const handler: APIHandler = async ({ data, request, response }) => {
   const { searchParams } = new URL(request.url);
-  const db = data.get('db');
+  const db = data.get("db");
   const { rows: [repository] } = await db.queryObject`
     SELECT owner, name
       FROM github_repositories
-      WHERE name ILIKE ${searchParams.get('name')}
-        AND owner ILIKE ${searchParams.get('owner')}
+      WHERE name ILIKE ${searchParams.get("name")}
+        AND owner ILIKE ${searchParams.get("owner")}
   `;
   if (!repository) {
     response.status = 404;
-    response.body = 'Not found';
+    response.body = "Not found";
     return;
   }
   const { owner, name } = repository;
@@ -36,10 +36,12 @@ export const handler: APIHandler = async ({ data, request, response }) => {
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
   `;
-  const logins = Array.from(new Set([
-    ...pullRequests.map(prop('author')),
-    ...reviewers.map(prop('reviewer')),
-  ]));
+  const logins = Array.from(
+    new Set([
+      ...pullRequests.map(prop("author")),
+      ...reviewers.map(prop("reviewer")),
+    ]),
+  );
   const { rows: users } = await db.queryObject`
     SELECT login, avatar_url as "avatarUrl"
       FROM github_users
@@ -53,4 +55,4 @@ export const handler: APIHandler = async ({ data, request, response }) => {
     suggestedReviewers,
     pullRequests,
   });
-}
+};
