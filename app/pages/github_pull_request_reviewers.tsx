@@ -1,10 +1,13 @@
-import { prop, whereEq } from "ramda";
+import { equals, prop, whereEq } from "ramda";
 import React, { Fragment, useEffect, useState, useCallback } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 
+const printRepository = (repo) => `${repo.owner}/${repo.name}`;
+
 export default function GithubPullRequestReviewers() {
   const [repositories, setRepositories] = useState([]);
+  const [currentRepository, setCurrentRepository] = useState();
   const [data, setData] = useState();
 
   useEffect(async () => {
@@ -13,15 +16,16 @@ export default function GithubPullRequestReviewers() {
     setRepositories(repositories);
   }, []);
 
-  const load = useCallback(async (repository) => {
+  const load = async (repository) => {
     const url = new URL("/api/github_pull_request_reviewers", window.location.origin);
     url.search = new URLSearchParams(repository).toString();
     const response = await fetch(url);
     if (response.status !== 200) {
       return;
     }
+    setCurrentRepository(repository);
     setData(await response.json());
-  }, []);
+  };
 
   const ref = useD3((svg) => {
     if (!data) { return; }
@@ -142,8 +146,8 @@ export default function GithubPullRequestReviewers() {
           <h1>Repository</h1>
           {
             repositories.map((repository) =>
-              <button onClick={() => load(repository)} key={`${repository.owner}/${repository.name}`}>
-                {repository.owner}/{repository.name}
+              <button disabled={equals(currentRepository, repository)} onClick={() => load(repository)} key={printRepository(repository)}>
+                {printRepository(repository)}
               </button>
             )
           }
