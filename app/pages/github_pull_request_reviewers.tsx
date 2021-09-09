@@ -1,5 +1,5 @@
 import { equals, prop, whereEq } from "ramda";
-import React, { Fragment, useEffect, useState, useCallback } from "react";
+import React, { Fragment, useEffect, useState, useCallback, useRef } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 
@@ -9,6 +9,7 @@ export default function GithubPullRequestReviewers() {
   const [repositories, setRepositories] = useState([]);
   const [currentRepository, setCurrentRepository] = useState();
   const [data, setData] = useState();
+  const tooltipRef = useRef();
 
   useEffect(async () => {
     const response = await fetch("/api/github_repositories");
@@ -85,6 +86,26 @@ export default function GithubPullRequestReviewers() {
           .attr("transform", "translate(-100%, 50%)")
           .text((d) => d)));
 
+    function showAuthorTooltip(event, d) {
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip.transition().duration(100).style("opacity", 1);
+      tooltip
+        .text(`#${d.id}: ${d.title}`)
+        .style("transform", `translate(${event.pageX}px, ${event.pageY}px) translate(-50%, -100%) translateY(-4px)`);
+      d3.selectAll(`[data-pr="${d.id}"]`).classed("highlight", true);
+    }
+
+    function showReviewerTooltip(event, d) {
+      const pullRequest = data.pullRequests.find(whereEq({ id: d.pullRequestId }));
+      showAuthorTooltip(event, pullRequest);
+    }
+
+    function hideTooltip() {
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip.transition().duration(100).style("opacity", 0);
+      d3.selectAll(".highlight").classed("highlight", false);
+    }
+
     svg.append("g")
       .attr("fill", "#3db843")
       .selectAll("rect")
@@ -93,7 +114,11 @@ export default function GithubPullRequestReviewers() {
         .attr("width", pointWidth)
         .attr("height", y.bandwidth())
         .attr("x", (d) => x(d.pullRequestId))
-        .attr("y", (d) => y(d.reviewer));
+        .attr("y", (d) => y(d.reviewer))
+        .attr("class", "reviewer")
+        .attr("data-pr", (d) => d.pullRequestId)
+        .on("mouseover", showReviewerTooltip)
+        .on("mouseout", hideTooltip);
 
     svg.append("g")
       .attr("fill", "#f5faed")
@@ -103,7 +128,11 @@ export default function GithubPullRequestReviewers() {
         .attr("width", pointWidth)
         .attr("height", y.bandwidth())
         .attr("x", (d) => x(d.id))
-        .attr("y", (d) => y(d.author));
+        .attr("y", (d) => y(d.author))
+        .attr("data-pr", (d) => d.id)
+        .attr("class", "author")
+        .on("mouseover", showAuthorTooltip)
+        .on("mouseout", hideTooltip);
 
     svg.append("g").call(yAxis);
   }, [data]);
@@ -115,14 +144,28 @@ export default function GithubPullRequestReviewers() {
           display: flex;
           flex-direction: row;
           height: 100vh;
-          widht: 100vw;
+          width: 100vw;
         }
 
         .viewport {
+          position: relative;
           flex-basis: 0;
           flex-grow: 1;
           overflow-x: auto;
           overflow-y: hidden;
+        }
+
+        .tooltip {
+          position: fixed;
+          top: 0;
+          left: 0;
+          background: white;
+          padding: 4px;
+          border-radius: 2px;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          opacity: 0;
+          box-shadow: 0 0 1px rgba(0, 0, 0, 0.25);
+          pointer-events: none;
         }
 
         .graph {
@@ -137,10 +180,15 @@ export default function GithubPullRequestReviewers() {
           text-align: center;
           border-left: 1px solid black;
         }
+
+        .highlight.author { fill: #59d5eb; }
+        .highlight.reviewer { fill: #234dd9; }
       `}</style>
       <div className="layout">
         <main className="viewport">
           <svg ref={ref} className="graph" />
+          <div className="tooltip" ref={tooltipRef}>
+          </div>
         </main>
         <aside className="settings">
           <h1>Repository</h1>
