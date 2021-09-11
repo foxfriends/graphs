@@ -36,7 +36,7 @@ export default function GithubPullRequestReviewers() {
     const { height } = svg.node().getBoundingClientRect();
     const margin = { left: 200 };
     const pointWidth = 2;
-    const ids = data.pullRequests.map(prop("id")).sort();
+    const ids = data.pullRequests.map(prop("id")).sort((a, b) => a - b);
     const width = ids.length * (pointWidth + 1) + margin.left;
 
     svg.attr("width", width);
