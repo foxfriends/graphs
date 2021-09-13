@@ -23,17 +23,9 @@ export default function ScatterSequence({
 
   const ref = useD3((svg) => {
     const relevantPoints = points
-      .filter(({ bucket }) => !bucketsHidden.has(bucket));
+      .filter(({ owningBucket }) => !bucketsHidden.has(owningBucket));
     const relevantSequence = sequence
-      .filter(({ id }) => relevantPoints.find(whereEq({
-        sequence: id,
-        owned: true,
-      })));
-    const orderedBuckets = [...buckets].sort((a, b) => {
-      if (bucketsHidden.has(a.id)) { return 1; }
-      if (bucketsHidden.has(b.id)) { return -1; }
-      return -1;
-    });
+      .filter(({ id }) => relevantPoints.find(whereEq({ sequence: id })));
 
     const pointWidth = 3;
     const rowHeight = 75;
@@ -44,13 +36,13 @@ export default function ScatterSequence({
 
     const y = d3
       .scaleBand()
-      .domain(orderedBuckets.map(prop('id')))
+      .domain(buckets.map(prop('id')))
       .range([0, height]);
 
     const x = d3
       .scaleBand()
       .domain(relevantSequence.map(prop('id')))
-      .range([margin.left, width]);
+      .range([margin.left + 1, width]);
 
     const t = svg.transition().duration(500);
 
@@ -75,6 +67,7 @@ export default function ScatterSequence({
           .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
           .on("click", toggleBucket)
           .call((update) => update.transition(t).attr("y", (d) => y(d.id))),
+        (remove) => remove.remove(),
       );
 
     function showTooltip(event, d) {
@@ -116,6 +109,7 @@ export default function ScatterSequence({
             .transition(t)
             .attr("x", (d) => x(d.sequence))
             .attr("y", (d) => y(d.bucket))),
+        (remove) => remove.remove(),
       )
     svg
       .select(".y-axis")

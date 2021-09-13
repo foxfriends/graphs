@@ -32,14 +32,14 @@ export default function AllPullRequests({ data }) {
     sequence: prop('id'),
     color: always(focus === 'authors' ? colors.fg : colors.bg),
     tooltip: tooltipText,
-    owned: always(focus === 'authors'),
+    owningBucket: prop('author'),
   }));
   const reviewers = data.reviewers.map(applySpec({
     bucket: prop('reviewer'),
     sequence: prop('pullRequestId'),
     color: always(focus === 'reviewers' ? colors.fg : colors.bg),
     tooltip: pipe(prop('pullRequestId'), findPullRequest, tooltipText),
-    owned: always(focus === 'reviewers'),
+    owningBucket: pipe(prop('pullRequestId'), findPullRequest, prop('author')),
   }));
 
   const points = [
