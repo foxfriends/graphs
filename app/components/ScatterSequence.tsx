@@ -29,8 +29,11 @@ export default function ScatterSequence({
         sequence: id,
         owned: true,
       })));
-
-    svg.selectAll("*").remove();
+    const orderedBuckets = [...buckets].sort((a, b) => {
+      if (bucketsHidden.has(a.id)) { return 1; }
+      if (bucketsHidden.has(b.id)) { return -1; }
+      return -1;
+    });
 
     const pointWidth = 3;
     const rowHeight = 75;
@@ -41,7 +44,7 @@ export default function ScatterSequence({
 
     const y = d3
       .scaleBand()
-      .domain(buckets.map(prop('id')))
+      .domain(orderedBuckets.map(prop('id')))
       .range([0, height]);
 
     const x = d3
@@ -49,21 +52,30 @@ export default function ScatterSequence({
       .domain(relevantSequence.map(prop('id')))
       .range([margin.left, width]);
 
+    const t = svg.transition().duration(500);
+
     const yAxis = (g) => g
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y))
       .call((g) => g.selectAll("text").remove())
       .selectAll("image")
-      .data(buckets)
-      .join("image")
-      .attr("x", -y.bandwidth() - 10)
-      .attr("y", (d) => y(d.id))
-      .attr("width", y.bandwidth())
-      .attr("height", y.bandwidth())
-      .attr("xlink:href", (d) => d.image)
-      .on("click", toggleBucket)
-      .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
-      .style("cursor", "pointer"));
+      .data(buckets, (d) => d.id)
+      .join(
+        (enter) => enter
+          .append("image")
+          .attr("x", -y.bandwidth() - 10)
+          .attr("y", (d) => y(d.id))
+          .attr("width", y.bandwidth())
+          .attr("height", y.bandwidth())
+          .attr("xlink:href", (d) => d.image)
+          .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+          .style("cursor", "pointer")
+          .on("click", toggleBucket),
+        (update) => update
+          .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+          .on("click", toggleBucket)
+          .call((update) => update.transition(t).attr("y", (d) => y(d.id))),
+      );
 
     function showTooltip(event, d) {
       const tooltip = d3.select(tooltipRef.current);
@@ -81,20 +93,33 @@ export default function ScatterSequence({
     }
 
     svg
-      .append("g")
+      .select(".points")
       .selectAll("rect")
-      .data(relevantPoints)
-      .join("rect")
-        .attr("fill", (d) => d.color)
-        .attr("width", pointWidth)
-        .attr("height", y.bandwidth())
-        .attr("x", (d) => x(d.sequence))
-        .attr("y", (d) => y(d.bucket))
-        .attr("data-sequence", (d) => d.sequence)
-        .attr("data-bucket", (d) => d.bucket)
-        .on("mouseover", showTooltip)
-        .on("mouseout", hideTooltip);
-    svg.append("g").call(yAxis);
+      .data(relevantPoints, (d) => `${d.bucket}/${d.sequence}`)
+      .join(
+        (enter) => enter
+          .append("rect")
+          .attr("fill", (d) => d.color)
+          .attr("width", pointWidth)
+          .attr("height", y.bandwidth())
+          .attr("x", (d) => x(d.sequence))
+          .attr("y", (d) => y(d.bucket))
+          .attr("data-sequence", (d) => d.sequence)
+          .attr("data-bucket", (d) => d.bucket)
+          .on("mouseover", showTooltip)
+          .on("mouseout", hideTooltip),
+        (update) => update
+          .attr("fill", (d) => d.color)
+          .on("mouseover", showTooltip)
+          .on("mouseout", hideTooltip)
+          .call((update) => update
+            .transition(t)
+            .attr("x", (d) => x(d.sequence))
+            .attr("y", (d) => y(d.bucket))),
+      )
+    svg
+      .select(".y-axis")
+      .call(yAxis);
   }, [bucketsHidden, buckets, sequence, points]);
 
   return (
@@ -129,7 +154,10 @@ export default function ScatterSequence({
         .highlight { fill: #59d5eb; }
       `}</style>
       <div className="viewport">
-        <svg ref={ref} className="graph" />
+        <svg ref={ref} className="graph">
+          <g className="y-axis" />
+          <g className="points" />
+        </svg>
         <div className="tooltip" ref={tooltipRef} />
       </div>
     </Fragment>
