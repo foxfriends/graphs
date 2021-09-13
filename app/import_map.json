@@ -12,7 +12,8 @@
     "dotenv": "https://deno.land/x/dotenv@v3.0.0/mod.ts",
     "log": "https://deno.land/std@0.106.0/log/mod.ts",
     "postgres": "https://deno.land/x/postgres@v0.12.0/mod.ts",
-    "ramda": "https://deno.land/x/ramda@v0.27.2/mod.ts"
+    "ramda": "https://deno.land/x/ramda@v0.27.2/mod.ts",
+    "immutable": "https://deno.land/x/immutable@4.0.0-rc.14-deno/mod.ts"
   },
   "scopes": {}
 }

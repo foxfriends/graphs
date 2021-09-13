@@ -1,7 +1,8 @@
-import { prop } from "ramda";
-import React, { Fragment, useRef } from "react";
+import { prop, whereEq } from "ramda";
+import React, { Fragment, useCallback, useState, useRef } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
+import { Set } from "immutable";
 
 export default function ScatterSequence({
   buckets,
@@ -10,13 +11,31 @@ export default function ScatterSequence({
 }) {
   const tooltipRef = useRef();
 
+  const [bucketsHidden, setBucketsHidden] = useState(new Set());
+
+  const toggleBucket = useCallback((event, bucket) => {
+    if (bucketsHidden.has(bucket.id)) {
+      setBucketsHidden(bucketsHidden.delete(bucket.id));
+    } else {
+      setBucketsHidden(bucketsHidden.add(bucket.id));
+    }
+  }, [bucketsHidden]);
+
   const ref = useD3((svg) => {
+    const relevantPoints = points
+      .filter(({ bucket }) => !bucketsHidden.has(bucket));
+    const relevantSequence = sequence
+      .filter(({ id }) => relevantPoints.find(whereEq({
+        sequence: id,
+        owned: true,
+      })));
+
     svg.selectAll("*").remove();
 
     const margin = { left: 200 };
-    const pointWidth = 2;
+    const pointWidth = 3;
     const rowHeight = 75;
-    const width = sequence.length * (pointWidth + 1) + margin.left;
+    const width = relevantSequence.length * (pointWidth + 1) + margin.left;
     const height = rowHeight * buckets.length;
     svg.attr("width", width);
     svg.attr("height", height);
@@ -28,30 +47,34 @@ export default function ScatterSequence({
 
     const x = d3
       .scaleBand()
-      .domain(sequence.map(prop('id')))
+      .domain(relevantSequence.map(prop('id')))
       .range([margin.left, width]);
 
     const yAxis = (g) => g
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y))
       .call((g) => g.selectAll("text").remove())
+      .selectAll("g")
+      .data(buckets)
+      .join("g")
+      .attr("y", (d) => y(d.id))
+      .attr("class", "label")
       .call((g) => g
-        .selectAll(".tick")
-        .data(buckets)
-        .append("g")
-        .call((g) => g
-          .append("image")
-          .attr("x", -y.bandwidth() - 10)
-          .attr("y", -y.bandwidth() / 2)
-          .attr("width", y.bandwidth())
-          .attr("height", y.bandwidth())
-          .attr("xlink:href", (d) => d.image))
-        .call((g) => g
-          .append("text")
-          .attr("fill", "black")
-          .attr("x", -y.bandwidth() - 20)
-          .attr("transform", "translate(-100%, 50%)")
-          .text((d) => d.id)));
+        .append("image")
+        .attr("x", -y.bandwidth() - 10)
+        .attr("y", -y.bandwidth() / 2)
+        .attr("width", y.bandwidth())
+        .attr("height", y.bandwidth())
+        .attr("xlink:href", (d) => d.image)
+        .on("click", toggleBucket)
+        .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+        .style("cursor", "pointer"))
+      .call((g) => g
+        .append("text")
+        .attr("fill", "black")
+        .attr("x", -y.bandwidth() - 20)
+        .attr("transform", "translate(-100%, 50%)")
+        .text((d) => d.id)));
 
     function showTooltip(event, d) {
       const tooltip = d3.select(tooltipRef.current);
@@ -59,7 +82,7 @@ export default function ScatterSequence({
       tooltip
         .text(d.tooltip)
         .style("transform", `translate(${event.pageX}px, ${event.pageY}px) translate(-50%, -100%) translateY(-4px)`);
-      d3.selectAll(`[data-sequence="${d.id}"]`).classed("highlight", true);
+      d3.selectAll(`[data-sequence="${d.sequence}"]`).classed("highlight", true);
     }
 
     function hideTooltip() {
@@ -71,7 +94,7 @@ export default function ScatterSequence({
     svg
       .append("g")
       .selectAll("rect")
-      .data(points)
+      .data(relevantPoints)
       .join("rect")
         .attr("fill", (d) => d.color)
         .attr("width", pointWidth)
@@ -83,7 +106,7 @@ export default function ScatterSequence({
         .on("mouseover", showTooltip)
         .on("mouseout", hideTooltip);
     svg.append("g").call(yAxis);
-  }, [buckets, sequence, points]);
+  }, [bucketsHidden, buckets, sequence, points]);
 
   return (
     <Fragment>
