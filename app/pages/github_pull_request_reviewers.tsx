@@ -31,22 +31,22 @@ export default function GithubPullRequestReviewers() {
       <style>{`
         .layout {
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           height: 100vh;
           width: 100vw;
         }
 
         .settings {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           gap: 16px;
           padding: 0 16px;
-          text-align: center;
           border-left: 1px solid black;
+          align-items: center;
+          overflow-x: auto;
         }
       `}</style>
       <div className="layout">
-        <GithubPullRequestReviewersDashboard data={data} />
         <div className="settings">
           <h1>Repository</h1>
           {
@@ -57,6 +57,7 @@ export default function GithubPullRequestReviewers() {
             )
           }
         </div>
+        <GithubPullRequestReviewersDashboard data={data} />
       </div>
     </Fragment>
   );

@@ -32,13 +32,12 @@ export default function ScatterSequence({
 
     svg.selectAll("*").remove();
 
-    const margin = { left: 200 };
     const pointWidth = 3;
     const rowHeight = 75;
+    const margin = { left: rowHeight + 10 };
     const width = relevantSequence.length * (pointWidth + 1) + margin.left;
     const height = rowHeight * buckets.length;
-    svg.attr("width", width);
-    svg.attr("height", height);
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
 
     const y = d3
       .scaleBand()
@@ -54,27 +53,17 @@ export default function ScatterSequence({
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y))
       .call((g) => g.selectAll("text").remove())
-      .selectAll("g")
+      .selectAll("image")
       .data(buckets)
-      .join("g")
+      .join("image")
+      .attr("x", -y.bandwidth() - 10)
       .attr("y", (d) => y(d.id))
-      .attr("class", "label")
-      .call((g) => g
-        .append("image")
-        .attr("x", -y.bandwidth() - 10)
-        .attr("y", -y.bandwidth() / 2)
-        .attr("width", y.bandwidth())
-        .attr("height", y.bandwidth())
-        .attr("xlink:href", (d) => d.image)
-        .on("click", toggleBucket)
-        .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
-        .style("cursor", "pointer"))
-      .call((g) => g
-        .append("text")
-        .attr("fill", "black")
-        .attr("x", -y.bandwidth() - 20)
-        .attr("transform", "translate(-100%, 50%)")
-        .text((d) => d.id)));
+      .attr("width", y.bandwidth())
+      .attr("height", y.bandwidth())
+      .attr("xlink:href", (d) => d.image)
+      .on("click", toggleBucket)
+      .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+      .style("cursor", "pointer"));
 
     function showTooltip(event, d) {
       const tooltip = d3.select(tooltipRef.current);
@@ -113,10 +102,10 @@ export default function ScatterSequence({
       <style>{`
         .viewport {
           position: relative;
-          flex-basis: 0;
-          flex-grow: 1;
           overflow-x: auto;
           overflow-y: hidden;
+          max-width: 100%;
+          height: 100%;
         }
 
         .tooltip {
@@ -133,7 +122,8 @@ export default function ScatterSequence({
         }
 
         .graph {
-          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
         }
 
         .highlight { fill: #59d5eb; }
