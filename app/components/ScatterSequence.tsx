@@ -1,46 +1,35 @@
-import { equals, prop, whereEq } from "ramda";
+import { prop } from "ramda";
 import React, { Fragment, useRef } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 
-export default function ScatterSequence({ data }) {
+export default function ScatterSequence({
+  buckets,
+  sequence,
+  points,
+}) {
   const tooltipRef = useRef();
 
   const ref = useD3((svg) => {
-    if (!data) { return; }
-
     svg.selectAll("*").remove();
 
-    const { height } = svg.node().getBoundingClientRect();
     const margin = { left: 200 };
     const pointWidth = 2;
-    const ids = data.pullRequests.map(prop("id")).sort((a, b) => a - b);
-    const width = ids.length * (pointWidth + 1) + margin.left;
-
+    const rowHeight = 75;
+    const width = sequence.length * (pointWidth + 1) + margin.left;
+    const height = rowHeight * buckets.length;
     svg.attr("width", width);
-
-    const userOrder = Object.fromEntries(data
-      .users
-      .map(({ login }) => [login, Math.min(...data
-        .reviewers
-        .filter(whereEq({ reviewer: login }))
-        .map(prop("pullRequestId")))]));
-
-    const sortedUsers = data
-      .users
-      .map(prop("login"))
-      .sort((a, b) => userOrder[a] - userOrder[b]);
+    svg.attr("height", height);
 
     const y = d3
       .scaleBand()
-      .domain(sortedUsers)
+      .domain(buckets.map(prop('id')))
       .range([0, height]);
+
     const x = d3
       .scaleBand()
-      .domain(ids)
+      .domain(sequence.map(prop('id')))
       .range([margin.left, width]);
-
-    const avatarSize = Math.min(75, y.bandwidth());
 
     const yAxis = (g) => g
       .attr("transform", `translate(${margin.left}, 0)`)
@@ -48,34 +37,29 @@ export default function ScatterSequence({ data }) {
       .call((g) => g.selectAll("text").remove())
       .call((g) => g
         .selectAll(".tick")
-        .data(sortedUsers)
+        .data(buckets)
         .append("g")
         .call((g) => g
           .append("image")
-          .attr("x", -avatarSize - 10)
-          .attr("y", -avatarSize / 2)
-          .attr("width", avatarSize)
-          .attr("height", avatarSize)
-          .attr("xlink:href", (d) => data.users.find(whereEq({ login: d }))?.avatarUrl))
+          .attr("x", -y.bandwidth() - 10)
+          .attr("y", -y.bandwidth() / 2)
+          .attr("width", y.bandwidth())
+          .attr("height", y.bandwidth())
+          .attr("xlink:href", (d) => d.image))
         .call((g) => g
           .append("text")
           .attr("fill", "black")
-          .attr("x", -avatarSize - 20)
+          .attr("x", -y.bandwidth() - 20)
           .attr("transform", "translate(-100%, 50%)")
-          .text((d) => d)));
+          .text((d) => d.id)));
 
-    function showAuthorTooltip(event, d) {
+    function showTooltip(event, d) {
       const tooltip = d3.select(tooltipRef.current);
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip
-        .text(`#${d.id}: ${d.title}`)
+        .text(d.tooltip)
         .style("transform", `translate(${event.pageX}px, ${event.pageY}px) translate(-50%, -100%) translateY(-4px)`);
-      d3.selectAll(`[data-pr="${d.id}"]`).classed("highlight", true);
-    }
-
-    function showReviewerTooltip(event, d) {
-      const pullRequest = data.pullRequests.find(whereEq({ id: d.pullRequestId }));
-      showAuthorTooltip(event, pullRequest);
+      d3.selectAll(`[data-sequence="${d.id}"]`).classed("highlight", true);
     }
 
     function hideTooltip() {
@@ -84,36 +68,22 @@ export default function ScatterSequence({ data }) {
       d3.selectAll(".highlight").classed("highlight", false);
     }
 
-    svg.append("g")
-      .attr("fill", "#3db843")
+    svg
+      .append("g")
       .selectAll("rect")
-      .data(data.reviewers)
+      .data(points)
       .join("rect")
+        .attr("fill", (d) => d.color)
         .attr("width", pointWidth)
         .attr("height", y.bandwidth())
-        .attr("x", (d) => x(d.pullRequestId))
-        .attr("y", (d) => y(d.reviewer))
-        .attr("class", "reviewer")
-        .attr("data-pr", (d) => d.pullRequestId)
-        .on("mouseover", showReviewerTooltip)
+        .attr("x", (d) => x(d.sequence))
+        .attr("y", (d) => y(d.bucket))
+        .attr("data-sequence", (d) => d.sequence)
+        .attr("data-bucket", (d) => d.bucket)
+        .on("mouseover", showTooltip)
         .on("mouseout", hideTooltip);
-
-    svg.append("g")
-      .attr("fill", "#f5faed")
-      .selectAll("rect")
-      .data(data.pullRequests)
-      .join("rect")
-        .attr("width", pointWidth)
-        .attr("height", y.bandwidth())
-        .attr("x", (d) => x(d.id))
-        .attr("y", (d) => y(d.author))
-        .attr("data-pr", (d) => d.id)
-        .attr("class", "author")
-        .on("mouseover", showAuthorTooltip)
-        .on("mouseout", hideTooltip);
-
     svg.append("g").call(yAxis);
-  }, [data]);
+  }, [buckets, sequence, points]);
 
   return (
     <Fragment>
@@ -143,8 +113,7 @@ export default function ScatterSequence({ data }) {
           height: 100%;
         }
 
-        .highlight.author { fill: #59d5eb; }
-        .highlight.reviewer { fill: #234dd9; }
+        .highlight { fill: #59d5eb; }
       `}</style>
       <div className="viewport">
         <svg ref={ref} className="graph" />

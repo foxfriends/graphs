@@ -1,7 +1,6 @@
 import { equals, prop, whereEq } from "ramda";
 import React, { Fragment, useEffect, useState, useRef } from "react";
-import { useD3 } from "~/lib/useD3.ts";
-import ScatterSequence from "~/components/ScatterSequence.tsx";
+import GithubPullRequestReviewersDashboard from "./_components/GithubPullRequestReviewersDashboard.tsx";
 
 const printRepository = (repo) => `${repo.owner}/${repo.name}`;
 
@@ -47,7 +46,7 @@ export default function GithubPullRequestReviewers() {
         }
       `}</style>
       <div className="layout">
-        { data ? <ScatterSequence data={data} /> : null }
+        <GithubPullRequestReviewersDashboard data={data} />
         <div className="settings">
           <h1>Repository</h1>
           {
