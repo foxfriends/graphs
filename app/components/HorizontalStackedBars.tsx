@@ -44,7 +44,7 @@ export default function HorizontalStackedBars({
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip
         .text(d.key)
-        .style("transform", `translate(${event.pageX}px, ${event.pageY}px) translate(-50%, -100%) translateY(-4px)`);
+        .style("transform", `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`);
     }
 
     function hideTooltip() {
@@ -90,7 +90,7 @@ export default function HorizontalStackedBars({
   return (
     <Fragment>
       <style>{`
-        .viewport {
+        .horizontal-stacked-bars {
           position: relative;
           overflow-x: auto;
           overflow-y: hidden;
@@ -98,7 +98,7 @@ export default function HorizontalStackedBars({
           height: 100%;
         }
 
-        .tooltip {
+        .horizontal-stacked-bars .tooltip {
           position: fixed;
           top: 0;
           left: 0;
@@ -111,12 +111,12 @@ export default function HorizontalStackedBars({
           pointer-events: none;
         }
 
-        .graph {
+        .horizontal-stacked-bars .graph {
           max-width: 100%;
           max-height: 100%;
         }
       `}</style>
-      <div className="viewport">
+      <div className="horizontal-stacked-bars">
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="stacks" />

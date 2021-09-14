@@ -79,7 +79,7 @@ export default function ScatterSequence({
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip
         .text(d.tooltip)
-        .style("transform", `translate(${event.pageX}px, ${event.pageY}px) translate(-50%, -100%) translateY(-4px)`);
+        .style("transform", `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`);
       d3.selectAll(`[data-sequence="${d.sequence}"]`).classed("highlight", true);
     }
 
@@ -124,7 +124,7 @@ export default function ScatterSequence({
   return (
     <Fragment>
       <style>{`
-        .viewport {
+        .scatter-sequence {
           position: relative;
           overflow-x: auto;
           overflow-y: hidden;
@@ -132,7 +132,7 @@ export default function ScatterSequence({
           height: 100%;
         }
 
-        .tooltip {
+        .scatter-sequence .tooltip {
           position: fixed;
           top: 0;
           left: 0;
@@ -145,14 +145,14 @@ export default function ScatterSequence({
           pointer-events: none;
         }
 
-        .graph {
+        .scatter-sequence .graph {
           max-width: 100%;
           max-height: 100%;
         }
 
-        .highlight { fill: #59d5eb; }
+        .scatter-sequence .highlight { fill: #59d5eb; }
       `}</style>
-      <div className="viewport">
+      <div className="scatter-sequence">
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="points" />

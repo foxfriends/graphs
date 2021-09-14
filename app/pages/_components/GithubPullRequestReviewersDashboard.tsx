@@ -1,19 +1,33 @@
 import React, { Fragment } from "react";
 import AllPullRequests from "./AllPullRequests.tsx";
 import ReviewerPreference from "./ReviewerPreference.tsx";
+import ReviewRequesters from "./ReviewRequesters.tsx";
 
 export default function GithubPullRequestReviewersDashboard({ data }) {
   if (!data) { return null; }
   return (
-    <Fragment>
+    <div className="dashboard">
       <style>{`
-        .all-pull-requests {
+        .dashboard {
+          display: grid;
+          grid-template:
+            "allprs allprs" 300px
+            "revprf revreq" auto
+          / 1fr     1fr;
           width: 100%;
-          max-height: 250px;
+          height: 100%;
+        }
+
+        .all-pull-requests {
+          grid-area: allprs;
         }
 
         .reviewer-preference {
-          width: 600px;
+          grid-area: revprf;
+        }
+
+        .review-requesters {
+          grid-area: revreq;
         }
       `}</style>
       <div className="all-pull-requests">
@@ -22,6 +36,9 @@ export default function GithubPullRequestReviewersDashboard({ data }) {
       <div className="reviewer-preference">
         <ReviewerPreference data={data} />
       </div>
-    </Fragment>
+      <div className="review-requesters">
+        <ReviewRequesters data={data} />
+      </div>
+    </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 } from "ramda";
 import HorizontalStackedBars from "~/components/HorizontalStackedBars.tsx";
 
-export default function ReviewerPreference({ data }) {
+export default function ReviewRequesters({ data }) {
   const bars = data.users.map(applySpec({
     id: prop('login'),
     image: prop('avatarUrl'),
@@ -25,10 +25,10 @@ export default function ReviewerPreference({ data }) {
   const zero = Object.fromEntries(groups.map(({ id }) => [id, 0]))
 
   const stackForBar = (bar) => data
-    .pullRequests
-    .filter(whereEq({ author: bar.id }))
-    .flatMap(({ id }) => data.reviewers.filter(whereEq({ pullRequestId: id })))
-    .map(prop('reviewer'))
+    .reviewers
+    .filter(whereEq({ reviewer: bar.id }))
+    .map(({ pullRequestId }) => data.pullRequests.find(whereEq({ id: pullRequestId })))
+    .map(prop('author'))
     .filter(complement(equals(bar.id)))
     .reduce((count, name) => over(lensProp(name), inc, count), zero);
 

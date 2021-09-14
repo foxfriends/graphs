@@ -26,39 +26,34 @@ export default function GithubPullRequestReviewers() {
     setData(await response.json());
   };
 
-  return (
-    <Fragment>
-      <style>{`
-        .layout {
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-          width: 100vw;
-        }
+  if (currentRepository) {
+    return <GithubPullRequestReviewersDashboard data={data} />;
+  } else {
+    return (
+      <Fragment>
+        <style>{`
+          .choose-repository {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+            align-items: flex-start;
+          }
 
-        .settings {
-          display: flex;
-          flex-direction: row;
-          gap: 16px;
-          padding: 0 16px;
-          border-left: 1px solid black;
-          align-items: center;
-          overflow-x: auto;
-        }
-      `}</style>
-      <div className="layout">
-        <div className="settings">
-          <h1>Repository</h1>
+          .repository {
+            padding: 8px;
+          }
+        `}</style>
+        <div className="choose-repository">
           {
             repositories.map((repository) =>
-              <button disabled={equals(currentRepository, repository)} onClick={() => load(repository)} key={printRepository(repository)}>
+              <button className="repository" onClick={() => load(repository)} key={printRepository(repository)}>
                 {printRepository(repository)}
               </button>
             )
           }
         </div>
-        <GithubPullRequestReviewersDashboard data={data} />
-      </div>
-    </Fragment>
-  );
+      </Fragment>
+    );
+  }
 }
