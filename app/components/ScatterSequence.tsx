@@ -1,5 +1,5 @@
 import { prop, whereEq } from "ramda";
-import React, { Fragment, useCallback, useState, useRef } from "react";
+import React, { Fragment, useCallback, useState, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 import { Set } from "immutable";
@@ -21,12 +21,16 @@ export default function ScatterSequence({
     }
   }, [bucketsHidden]);
 
-  const ref = useD3((svg) => {
-    const relevantPoints = points
-      .filter(({ owningBucket }) => !bucketsHidden.has(owningBucket));
-    const relevantSequence = sequence
-      .filter(({ id }) => relevantPoints.find(whereEq({ sequence: id })));
+  const relevantPoints = useMemo(
+    () => points.filter(({ owningBucket }) => !bucketsHidden.has(owningBucket)),
+    [points, bucketsHidden],
+  );
+  const relevantSequence = useMemo(
+    () => sequence.filter(({ id }) => relevantPoints.find(whereEq({ sequence: id }))),
+    [relevantPoints],
+  );
 
+  const ref = useD3((svg) => {
     const pointWidth = 3;
     const rowHeight = 75;
     const margin = { left: rowHeight + 10 };
@@ -110,11 +114,12 @@ export default function ScatterSequence({
             .attr("x", (d) => x(d.sequence))
             .attr("y", (d) => y(d.bucket))),
         (remove) => remove.remove(),
-      )
+      );
+
     svg
       .select(".y-axis")
       .call(yAxis);
-  }, [bucketsHidden, buckets, sequence, points]);
+  }, [bucketsHidden, buckets, relevantPoints, relevantSequence]);
 
   return (
     <Fragment>
