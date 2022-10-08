@@ -95,8 +95,8 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
           .text(d.tooltip)
           .style(
             "transform",
-            `translate(${event.clientX - left}px, ${
-              event.clientY - top
+            `translate(${x(d.sequence)}px, ${
+              y(d.bucket)
             }px) translate(-50%, -100%) translateY(-4px)`,
           );
         d3.selectAll(`[data-sequence="${d.sequence}"]`).classed(
@@ -145,7 +145,6 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
       <style>
         {`
         .scatter-sequence {
-          position: relative;
           width: 100%;
           height: 100%;
         }

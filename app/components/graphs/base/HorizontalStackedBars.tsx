@@ -37,14 +37,29 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
 
       const t = svg.transition().duration(500);
 
-      function showTooltip(event, label) {
+      function showAxisTooltip(event, d) {
         const tooltip = d3.select(tooltipRef.current);
         tooltip.transition().duration(100).style("opacity", 1);
         tooltip
-          .text(label)
+          .text(d.id)
           .style(
             "transform",
-            `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`,
+            `translate(${y.bandwidth() / 2 + 10}px, ${
+              y(d.id)
+            }px) translate(-50%, -100%) translateY(-4px)`,
+          );
+      }
+
+      function showDataTooltip(event, d) {
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip.transition().duration(100).style("opacity", 1);
+        tooltip
+          .text(event.target.parentElement.getAttribute("data-key"))
+          .style(
+            "transform",
+            `translate(${(x(d[0]) + x(d[1])) / 2}px, ${
+              y(d.data.bar)
+            }px) translate(-50%, -100%) translateY(-4px)`,
           );
       }
 
@@ -66,7 +81,7 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
           .attr("width", y.bandwidth())
           .attr("height", y.bandwidth())
           .attr("xlink:href", (d) => d.image)
-          .on("mouseover", (event, d) => showTooltip(event, d.id))
+          .on("mouseover", showAxisTooltip)
           .on("mouseout", hideTooltip);
 
       svg
@@ -75,15 +90,16 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
         .data(series)
         .join("g")
         .attr("fill", (d) => color(d.key))
-        .on("mouseover", (event, d) => showTooltip(event, d.key))
-        .on("mouseout", hideTooltip)
+        .attr("data-key", (d) => d.key)
         .selectAll("rect")
         .data((d) => d)
         .join("rect")
         .attr("width", (d) => x(d[1]) - x(d[0]))
         .attr("height", y.bandwidth())
         .attr("y", (d) => y(d.data.bar))
-        .attr("x", (d) => x(d[0]));
+        .attr("x", (d) => x(d[0]))
+        .on("mouseover", showDataTooltip)
+        .on("mouseout", hideTooltip);
 
       svg.select(".y-axis").call(yAxis);
     },
