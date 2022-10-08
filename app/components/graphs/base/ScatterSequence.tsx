@@ -164,9 +164,7 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         {`
         .scatter-sequence {
           position: relative;
-          overflow-x: auto;
-          overflow-y: hidden;
-          max-width: 100%;
+          width: 100%;
           height: 100%;
         }
 

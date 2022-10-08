@@ -1,4 +1,5 @@
 import ReviewRequesters from "~/components/graphs/ReviewRequesters.tsx";
+import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
 
@@ -11,5 +12,9 @@ export default function GithubReviewRequestersPage(
 ) {
   const { data } = useGithubPullRequestReviewers(repository);
   if (!data) return null;
-  return <ReviewRequesters data={data} />;
+  return (
+    <Movable>
+      <ReviewRequesters data={data} />
+    </Movable>
+  );
 }

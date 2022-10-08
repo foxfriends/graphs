@@ -1,4 +1,5 @@
 import ReviewerPreference from "~/components/graphs/ReviewerPreference.tsx";
+import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
 
@@ -11,5 +12,9 @@ export default function GithubPullRequestFrequencyPage(
 ) {
   const { data } = useGithubPullRequestReviewers(repository);
   if (!data) return null;
-  return <ReviewerPreference data={data} />;
+  return (
+    <Movable>
+      <ReviewerPreference data={data} />
+    </Movable>
+  );
 }

@@ -6,7 +6,6 @@ export function useD3(effect: EffectCallback, deps?: DependencyList) {
 
   useEffect(() => {
     effect(d3.select(ref.current));
-    return () => {};
   }, [...deps]);
 
   return ref;
