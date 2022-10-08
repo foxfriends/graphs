@@ -17,8 +17,8 @@ import {
 } from "ramda";
 import BoxPlot from "./base/BoxPlot.tsx";
 
-export default function PullRequestTimeToMerge({ data }) {
-  const points = data.pullRequests
+export default function PullRequestTimeToMerge({ pullRequests }) {
+  const points = pullRequests
     .filter(({ merged_at }) => !!merged_at)
     .map(({ author, created_at, merged_at }) => ({
       group: author,

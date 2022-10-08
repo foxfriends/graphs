@@ -143,35 +143,8 @@ export default function BoxPlot({ points }: Props) {
 
   return (
     <>
-      <style>
-        {`
-        .box-plot {
-          position: relative;
-          width: 100%;
-          height: 100%;
-        }
-
-        .box-plot .tooltip {
-          position: fixed;
-          top: 0;
-          left: 0;
-          background: white;
-          padding: 4px;
-          border-radius: 2px;
-          border: 1px solid rgba(0, 0, 0, 0.12);
-          opacity: 0;
-          box-shadow: 0 0 1px rgba(0, 0, 0, 0.25);
-          pointer-events: none;
-        }
-
-        .box-plot .graph {
-          max-width: 100%;
-          max-height: 100%;
-        }
-      `}
-      </style>
-      <div className="box-plot" ref={setContainer}>
-        <svg ref={ref} className="graph">
+      <div className="chart" ref={setContainer}>
+        <svg ref={ref}>
           <g className="data">
             <g className="y-axis" />
             <g className="x-axis" />

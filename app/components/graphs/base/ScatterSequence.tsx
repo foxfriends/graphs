@@ -144,33 +144,10 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
     <>
       <style>
         {`
-        .scatter-sequence {
-          width: 100%;
-          height: 100%;
-        }
-
-        .scatter-sequence .tooltip {
-          position: fixed;
-          top: 0;
-          left: 0;
-          background: white;
-          padding: 4px;
-          border-radius: 2px;
-          border: 1px solid rgba(0, 0, 0, 0.12);
-          opacity: 0;
-          box-shadow: 0 0 1px rgba(0, 0, 0, 0.25);
-          pointer-events: none;
-        }
-
-        .scatter-sequence .graph {
-          max-width: 100%;
-          max-height: 100%;
-        }
-
         .scatter-sequence .highlight { fill: #59d5eb; }
-      `}
+        `}
       </style>
-      <div className="scatter-sequence" ref={setContainer}>
+      <div className="chart scatter-sequence" ref={setContainer}>
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="points" />
