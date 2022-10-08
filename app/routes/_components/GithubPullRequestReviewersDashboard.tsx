@@ -1,13 +1,13 @@
-import React, { Fragment } from "react";
 import AllPullRequests from "./AllPullRequests.tsx";
 import ReviewerPreference from "./ReviewerPreference.tsx";
 import ReviewRequesters from "./ReviewRequesters.tsx";
 
 export default function GithubPullRequestReviewersDashboard({ data }) {
-  if (!data) { return null; }
+  if (!data) return null;
   return (
     <div className="dashboard">
-      <style>{`
+      <style>
+        {`
         .dashboard {
           display: grid;
           grid-template:
@@ -29,7 +29,8 @@ export default function GithubPullRequestReviewersDashboard({ data }) {
         .review-requesters {
           grid-area: revreq;
         }
-      `}</style>
+      `}
+      </style>
       <div className="all-pull-requests">
         <AllPullRequests data={data} />
       </div>

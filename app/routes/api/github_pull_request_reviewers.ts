@@ -1,19 +1,19 @@
-import type { APIHandler } from "aleph/types";
 import { prop } from "ramda";
+import { connect } from "~/lib/database.ts";
 
-export const handler: APIHandler = async ({ data, request, response }) => {
+export const GET = async (request) => {
   const { searchParams } = new URL(request.url);
-  const db = data.get("db");
-  const { rows: [repository] } = await db.queryObject`
+  const db = await connect();
+  const {
+    rows: [repository],
+  } = await db.queryObject`
     SELECT owner, name
       FROM github_repositories
       WHERE name ILIKE ${searchParams.get("name")}
         AND owner ILIKE ${searchParams.get("owner")}
   `;
   if (!repository) {
-    response.status = 404;
-    response.body = "Not found";
-    return;
+    return Response.json({ error: "Not Found" }, { status: 404 });
   }
   const { owner, name } = repository;
   console.log(`Loading pull requests for ${owner}/${name}`);
@@ -40,7 +40,7 @@ export const handler: APIHandler = async ({ data, request, response }) => {
     new Set([
       ...pullRequests.map(prop("author")),
       ...reviewers.map(prop("reviewer")),
-    ]),
+    ])
   );
   const { rows: users } = await db.queryObject`
     SELECT login, avatar_url as "avatarUrl"
@@ -49,7 +49,7 @@ export const handler: APIHandler = async ({ data, request, response }) => {
   `;
   console.log(`${users.length} pull requests found`);
 
-  response.json({
+  return Response.json({
     users,
     reviewers,
     suggestedReviewers,

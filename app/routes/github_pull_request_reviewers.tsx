@@ -1,5 +1,5 @@
 import { equals, prop, whereEq } from "ramda";
-import React, { Fragment, useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import GithubPullRequestReviewersDashboard from "./_components/GithubPullRequestReviewersDashboard.tsx";
 
 const printRepository = (repo) => `${repo.owner}/${repo.name}`;
@@ -9,14 +9,19 @@ export default function GithubPullRequestReviewers() {
   const [currentRepository, setCurrentRepository] = useState();
   const [data, setData] = useState();
 
-  useEffect(async () => {
-    const response = await fetch("/api/github_repositories");
-    const { repositories } = await response.json();
-    setRepositories(repositories);
+  useEffect(() => {
+    void (async () => {
+      const response = await fetch("/api/github_repositories");
+      const { repositories } = await response.json();
+      setRepositories(repositories);
+    })();
   }, []);
 
   const load = async (repository) => {
-    const url = new URL("/api/github_pull_request_reviewers", window.location.origin);
+    const url = new URL(
+      "/api/github_pull_request_reviewers",
+      window.location.origin
+    );
     url.search = new URLSearchParams(repository).toString();
     const response = await fetch(url);
     if (response.status !== 200) {
@@ -30,8 +35,9 @@ export default function GithubPullRequestReviewers() {
     return <GithubPullRequestReviewersDashboard data={data} />;
   } else {
     return (
-      <Fragment>
-        <style>{`
+      <>
+        <style>
+          {`
           .choose-repository {
             display: flex;
             flex-direction: column;
@@ -43,17 +49,20 @@ export default function GithubPullRequestReviewers() {
           .repository {
             padding: 8px;
           }
-        `}</style>
+        `}
+        </style>
         <div className="choose-repository">
-          {
-            repositories.map((repository) =>
-              <button className="repository" onClick={() => load(repository)} key={printRepository(repository)}>
-                {printRepository(repository)}
-              </button>
-            )
-          }
+          {repositories.map((repository) => (
+            <button
+              className="repository"
+              onClick={() => load(repository)}
+              key={printRepository(repository)}
+            >
+              {printRepository(repository)}
+            </button>
+          ))}
         </div>
-      </Fragment>
+      </>
     );
   }
 }

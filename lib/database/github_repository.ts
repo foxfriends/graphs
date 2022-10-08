@@ -1,5 +1,5 @@
-import logger from "../logger.ts";
 import type { Transaction } from "postgres";
+import logger from "../logger.ts";
 
 export type GithubRepository = {
   owner: string;

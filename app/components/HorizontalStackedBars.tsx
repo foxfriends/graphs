@@ -9,7 +9,7 @@ export default function HorizontalStackedBars({
   stacks,
 }) {
   const tooltipRef = useRef();
-  
+
   const ref = useD3((svg) => {
     const rowHeight = 50;
     const margin = { left: rowHeight + 10 };
@@ -17,7 +17,7 @@ export default function HorizontalStackedBars({
     const height = rowHeight * bars.length;
     svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-    const stack = d3.stack().keys(groups.map(prop('id')));
+    const stack = d3.stack().keys(groups.map(prop("id")));
     const series = stack(stacks);
 
     const y = d3
@@ -28,14 +28,14 @@ export default function HorizontalStackedBars({
 
     const x = d3
       .scaleLinear()
-      .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
+      .domain([0, d3.max(series, (d) => d3.max(d, (d) => d[1]))])
       .range([margin.left, width]);
 
     const color = d3
       .scaleOrdinal()
-      .domain(series.map(d => d.key))
+      .domain(series.map((d) => d.key))
       .range(d3.schemeSpectral[Math.min(11, Math.max(3, series.length))])
-      .unknown("#ccc")
+      .unknown("#ccc");
 
     const t = svg.transition().duration(500);
 
@@ -44,7 +44,10 @@ export default function HorizontalStackedBars({
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip
         .text(d.key)
-        .style("transform", `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`);
+        .style(
+          "transform",
+          `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`,
+        );
     }
 
     function hideTooltip() {
@@ -52,13 +55,14 @@ export default function HorizontalStackedBars({
       tooltip.transition().duration(100).style("opacity", 0);
     }
 
-    const yAxis = (g) => g
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(d3.axisLeft(y))
-      .call((g) => g.selectAll("text").remove())
-      .selectAll("image")
-      .data(bars, (d) => d.id)
-      .join("image")
+    const yAxis = (g) =>
+      g
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(d3.axisLeft(y))
+        .call((g) => g.selectAll("text").remove())
+        .selectAll("image")
+        .data(bars, (d) => d.id)
+        .join("image")
         .attr("x", -y.bandwidth() - 10)
         .attr("y", (d) => y(d.id))
         .attr("width", y.bandwidth())
@@ -70,26 +74,26 @@ export default function HorizontalStackedBars({
       .selectAll("g")
       .data(series)
       .join("g")
-        .attr("fill", (d) => color(d.key))
-        .on("mouseover", showTooltip)
-        .on("mouseout", hideTooltip)
-        .selectAll("rect")
-        .data((d) => d)
-        .join("rect")
-          .attr("width", (d) => x(d[1]) - x(d[0]))
-          .attr("height", y.bandwidth())
-          .attr("y", (d) => y(d.data.bar))
-          .attr("x", (d) => x(d[0]));
+      .attr("fill", (d) => color(d.key))
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip)
+      .selectAll("rect")
+      .data((d) => d)
+      .join("rect")
+      .attr("width", (d) => x(d[1]) - x(d[0]))
+      .attr("height", y.bandwidth())
+      .attr("y", (d) => y(d.data.bar))
+      .attr("x", (d) => x(d[0]));
 
     svg
       .select(".y-axis")
       .call(yAxis);
-
   }, [bars, groups, stacks]);
 
   return (
     <Fragment>
-      <style>{`
+      <style>
+        {`
         .horizontal-stacked-bars {
           position: relative;
           overflow-x: auto;
@@ -115,7 +119,8 @@ export default function HorizontalStackedBars({
           max-width: 100%;
           max-height: 100%;
         }
-      `}</style>
+      `}
+      </style>
       <div className="horizontal-stacked-bars">
         <svg ref={ref} className="graph">
           <g className="y-axis" />

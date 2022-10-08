@@ -1,5 +1,5 @@
 import { prop, whereEq } from "ramda";
-import React, { Fragment, useCallback, useState, useMemo, useRef } from "react";
+import React, { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/lib/useD3.ts";
 import { Set } from "immutable";
@@ -26,7 +26,10 @@ export default function ScatterSequence({
     [points, bucketsHidden],
   );
   const relevantSequence = useMemo(
-    () => sequence.filter(({ id }) => relevantPoints.find(whereEq({ sequence: id }))),
+    () =>
+      sequence.filter(({ id }) =>
+        relevantPoints.find(whereEq({ sequence: id }))
+      ),
     [relevantPoints],
   );
 
@@ -40,47 +43,56 @@ export default function ScatterSequence({
 
     const y = d3
       .scaleBand()
-      .domain(buckets.map(prop('id')))
+      .domain(buckets.map(prop("id")))
       .range([0, height]);
 
     const x = d3
       .scaleBand()
-      .domain(relevantSequence.map(prop('id')))
+      .domain(relevantSequence.map(prop("id")))
       .range([margin.left + 1, width]);
 
     const t = svg.transition().duration(500);
 
-    const yAxis = (g) => g
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(d3.axisLeft(y))
-      .call((g) => g.selectAll("text").remove())
-      .selectAll("image")
-      .data(buckets, (d) => d.id)
-      .join(
-        (enter) => enter
-          .append("image")
-          .attr("x", -y.bandwidth() - 10)
-          .attr("y", (d) => y(d.id))
-          .attr("width", y.bandwidth())
-          .attr("height", y.bandwidth())
-          .attr("xlink:href", (d) => d.image)
-          .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
-          .style("cursor", "pointer")
-          .on("click", toggleBucket),
-        (update) => update
-          .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
-          .on("click", toggleBucket)
-          .call((update) => update.transition(t).attr("y", (d) => y(d.id))),
-        (remove) => remove.remove(),
-      );
+    const yAxis = (g) =>
+      g
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(d3.axisLeft(y))
+        .call((g) => g.selectAll("text").remove())
+        .selectAll("image")
+        .data(buckets, (d) => d.id)
+        .join(
+          (enter) =>
+            enter
+              .append("image")
+              .attr("x", -y.bandwidth() - 10)
+              .attr("y", (d) => y(d.id))
+              .attr("width", y.bandwidth())
+              .attr("height", y.bandwidth())
+              .attr("xlink:href", (d) => d.image)
+              .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+              .style("cursor", "pointer")
+              .on("click", toggleBucket),
+          (update) =>
+            update
+              .style("opacity", (d) => bucketsHidden.has(d.id) ? 0.5 : 1)
+              .on("click", toggleBucket)
+              .call((update) => update.transition(t).attr("y", (d) => y(d.id))),
+          (remove) => remove.remove(),
+        );
 
     function showTooltip(event, d) {
       const tooltip = d3.select(tooltipRef.current);
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip
         .text(d.tooltip)
-        .style("transform", `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`);
-      d3.selectAll(`[data-sequence="${d.sequence}"]`).classed("highlight", true);
+        .style(
+          "transform",
+          `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`,
+        );
+      d3.selectAll(`[data-sequence="${d.sequence}"]`).classed(
+        "highlight",
+        true,
+      );
     }
 
     function hideTooltip() {
@@ -94,25 +106,29 @@ export default function ScatterSequence({
       .selectAll("rect")
       .data(relevantPoints, (d) => `${d.bucket}/${d.sequence}`)
       .join(
-        (enter) => enter
-          .append("rect")
-          .attr("fill", (d) => d.color)
-          .attr("width", pointWidth)
-          .attr("height", y.bandwidth())
-          .attr("x", (d) => x(d.sequence))
-          .attr("y", (d) => y(d.bucket))
-          .attr("data-sequence", (d) => d.sequence)
-          .attr("data-bucket", (d) => d.bucket)
-          .on("mouseover", showTooltip)
-          .on("mouseout", hideTooltip),
-        (update) => update
-          .attr("fill", (d) => d.color)
-          .on("mouseover", showTooltip)
-          .on("mouseout", hideTooltip)
-          .call((update) => update
-            .transition(t)
+        (enter) =>
+          enter
+            .append("rect")
+            .attr("fill", (d) => d.color)
+            .attr("width", pointWidth)
+            .attr("height", y.bandwidth())
             .attr("x", (d) => x(d.sequence))
-            .attr("y", (d) => y(d.bucket))),
+            .attr("y", (d) => y(d.bucket))
+            .attr("data-sequence", (d) => d.sequence)
+            .attr("data-bucket", (d) => d.bucket)
+            .on("mouseover", showTooltip)
+            .on("mouseout", hideTooltip),
+        (update) =>
+          update
+            .attr("fill", (d) => d.color)
+            .on("mouseover", showTooltip)
+            .on("mouseout", hideTooltip)
+            .call((update) =>
+              update
+                .transition(t)
+                .attr("x", (d) => x(d.sequence))
+                .attr("y", (d) => y(d.bucket))
+            ),
         (remove) => remove.remove(),
       );
 
@@ -123,7 +139,8 @@ export default function ScatterSequence({
 
   return (
     <Fragment>
-      <style>{`
+      <style>
+        {`
         .scatter-sequence {
           position: relative;
           overflow-x: auto;
@@ -151,7 +168,8 @@ export default function ScatterSequence({
         }
 
         .scatter-sequence .highlight { fill: #59d5eb; }
-      `}</style>
+      `}
+      </style>
       <div className="scatter-sequence">
         <svg ref={ref} className="graph">
           <g className="y-axis" />

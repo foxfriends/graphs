@@ -1,4 +1,4 @@
-import { getLogger, handlers as Handlers, setup } from "log";
+import { getLogger, handlers as Handlers, setup } from "std/log/mod.ts";
 import { LOG_FILE, LOG_LEVEL } from "./env.ts";
 
 const { ConsoleHandler, FileHandler, BaseHandler } = Handlers;

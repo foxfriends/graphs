@@ -1,5 +1,5 @@
-import logger from "../logger.ts";
 import type { Transaction } from "postgres";
+import logger from "../logger.ts";
 
 export type GithubUser = {
   login: string;
@@ -8,7 +8,7 @@ export type GithubUser = {
 
 export async function getUserByLogin(
   db: Transaction,
-  login: string,
+  login: string
 ): Promise<GithubUser | null> {
   const result = await db.queryObject<GithubUser>`
     SELECT login, avatar_url as "avatarUrl"
@@ -20,7 +20,7 @@ export async function getUserByLogin(
 
 export async function saveUser(
   db: Transaction,
-  user: GithubUser,
+  user: GithubUser
 ): Promise<void> {
   logger.debug("saveUser", user);
   await db.queryArray`

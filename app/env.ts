@@ -1,4 +1,4 @@
-import type { LevelName } from "log";
+import type { LevelName } from "std/log/mod.ts";
 import { config } from "dotenv";
 
 function int(str: string): number {
