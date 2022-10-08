@@ -1,17 +1,18 @@
+import { useRef, useState } from "react";
 import { prop } from "ramda";
-import React, { Fragment, useRef } from "react";
 import * as d3 from "d3";
 import { useD3 } from "~/hooks/useD3.ts";
+import { useBoundingClientRect } from "~/hooks/useBoundingClientRect.ts";
 
 export default function HorizontalStackedBars({ bars, groups, stacks }) {
   const tooltipRef = useRef();
+  const [container, setContainer] = useState(null);
+  const { width = 0, height = 0 } = useBoundingClientRect(container) ?? {};
 
   const ref = useD3(
     (svg) => {
-      const rowHeight = 50;
+      const rowHeight = height / bars.length;
       const margin = { left: rowHeight + 10 };
-      const width = 600;
-      const height = rowHeight * bars.length;
       svg.attr("viewBox", `0 0 ${width} ${height}`);
 
       const stack = d3.stack().keys(groups.map(prop("id")));
@@ -86,11 +87,11 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
 
       svg.select(".y-axis").call(yAxis);
     },
-    [bars, groups, stacks],
+    [bars, groups, stacks, width, height],
   );
 
   return (
-    <Fragment>
+    <>
       <style>
         {`
         .horizontal-stacked-bars {
@@ -118,13 +119,13 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
         }
       `}
       </style>
-      <div className="horizontal-stacked-bars">
+      <div className="horizontal-stacked-bars" ref={setContainer}>
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="stacks" />
         </svg>
         <div className="tooltip" ref={tooltipRef} />
       </div>
-    </Fragment>
+    </>
   );
 }

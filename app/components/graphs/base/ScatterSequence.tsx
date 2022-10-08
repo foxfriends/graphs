@@ -1,8 +1,9 @@
+import { useCallback, useMemo, useRef, useState } from "react";
 import { prop, whereEq } from "ramda";
-import React, { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Set } from "immutable";
 import { useD3 } from "~/hooks/useD3.ts";
+import { useBoundingClientRect } from "~/hooks/useBoundingClientRect.ts";
 
 type Bucket = {
   id: string;
@@ -25,6 +26,9 @@ type Props = {
 
 export default function ScatterSequence({ buckets, sequence, points }: Props) {
   const tooltipRef = useRef();
+  const [container, setContainer] = useState(null);
+  const { width = 0, height = 0, left = 0, top = 0 } =
+    useBoundingClientRect(container) ?? {};
 
   const [bucketsHidden, setBucketsHidden] = useState(new Set());
 
@@ -53,11 +57,8 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
 
   const ref = useD3(
     (svg) => {
-      const pointWidth = 3;
-      const rowHeight = 75;
+      const rowHeight = height / buckets.length;
       const margin = { left: rowHeight + 10 };
-      const width = relevantSequence.length * (pointWidth + 1) + margin.left;
-      const height = rowHeight * buckets.length;
       svg.attr("viewBox", `0 0 ${width} ${height}`);
 
       const y = d3
@@ -70,8 +71,6 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         .domain(relevantSequence.map(prop("id")))
         .range([margin.left + 1, width]);
 
-      const t = svg.transition().duration(500);
-
       const yAxis = (g) =>
         g
           .attr("transform", `translate(${margin.left}, 0)`)
@@ -79,27 +78,15 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
           .call((g) => g.selectAll("text").remove())
           .selectAll("image")
           .data(buckets, (d) => d.id)
-          .join(
-            (enter) =>
-              enter
-                .append("image")
-                .attr("x", -y.bandwidth() - 10)
-                .attr("y", (d) => y(d.id))
-                .attr("width", y.bandwidth())
-                .attr("height", y.bandwidth())
-                .attr("xlink:href", (d) => d.image)
-                .style("opacity", (d) => (bucketsHidden.has(d.id) ? 0.5 : 1))
-                .style("cursor", "pointer")
-                .on("click", toggleBucket),
-            (update) =>
-              update
-                .style("opacity", (d) => (bucketsHidden.has(d.id) ? 0.5 : 1))
-                .on("click", toggleBucket)
-                .call((update) =>
-                  update.transition(t).attr("y", (d) => y(d.id))
-                ),
-            (remove) => remove.remove(),
-          );
+          .join("image")
+          .attr("x", -y.bandwidth() - 10)
+          .attr("y", (d) => y(d.id))
+          .attr("width", y.bandwidth())
+          .attr("height", y.bandwidth())
+          .attr("xlink:href", (d) => d.image)
+          .style("opacity", (d) => (bucketsHidden.has(d.id) ? 0.5 : 1))
+          .style("cursor", "pointer")
+          .on("click", toggleBucket);
 
       function showTooltip(event, d) {
         const tooltip = d3.select(tooltipRef.current);
@@ -108,7 +95,9 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
           .text(d.tooltip)
           .style(
             "transform",
-            `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`,
+            `translate(${event.clientX - left}px, ${
+              event.clientY - top
+            }px) translate(-50%, -100%) translateY(-4px)`,
           );
         d3.selectAll(`[data-sequence="${d.sequence}"]`).classed(
           "highlight",
@@ -126,40 +115,33 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         .select(".points")
         .selectAll("rect")
         .data(relevantPoints, (d) => `${d.bucket}/${d.sequence}`)
-        .join(
-          (enter) =>
-            enter
-              .append("rect")
-              .attr("fill", (d) => d.color)
-              .attr("width", pointWidth)
-              .attr("height", y.bandwidth())
-              .attr("x", (d) => x(d.sequence))
-              .attr("y", (d) => y(d.bucket))
-              .attr("data-sequence", (d) => d.sequence)
-              .attr("data-bucket", (d) => d.bucket)
-              .on("mouseover", showTooltip)
-              .on("mouseout", hideTooltip),
-          (update) =>
-            update
-              .attr("fill", (d) => d.color)
-              .on("mouseover", showTooltip)
-              .on("mouseout", hideTooltip)
-              .call((update) =>
-                update
-                  .transition(t)
-                  .attr("x", (d) => x(d.sequence))
-                  .attr("y", (d) => y(d.bucket))
-              ),
-          (remove) => remove.remove(),
-        );
+        .join("rect")
+        .attr("fill", (d) => d.color)
+        .attr("width", x.bandwidth())
+        .attr("height", y.bandwidth())
+        .attr("x", (d) => x(d.sequence))
+        .attr("y", (d) => y(d.bucket))
+        .attr("data-sequence", (d) => d.sequence)
+        .attr("data-bucket", (d) => d.bucket)
+        .on("mouseover", showTooltip)
+        .on("mouseout", hideTooltip);
 
       svg.select(".y-axis").call(yAxis);
     },
-    [bucketsHidden, buckets, relevantPoints, relevantSequence],
+    [
+      bucketsHidden,
+      buckets,
+      relevantPoints,
+      relevantSequence,
+      width,
+      height,
+      left,
+      top,
+    ],
   );
 
   return (
-    <Fragment>
+    <>
       <style>
         {`
         .scatter-sequence {
@@ -189,13 +171,13 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         .scatter-sequence .highlight { fill: #59d5eb; }
       `}
       </style>
-      <div className="scatter-sequence">
+      <div className="scatter-sequence" ref={setContainer}>
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="points" />
         </svg>
         <div className="tooltip" ref={tooltipRef} />
       </div>
-    </Fragment>
+    </>
   );
 }
