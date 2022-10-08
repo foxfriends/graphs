@@ -1,6 +1,6 @@
-import AllPullRequests from "./AllPullRequests.tsx";
-import ReviewerPreference from "./ReviewerPreference.tsx";
-import ReviewRequesters from "./ReviewRequesters.tsx";
+import AllPullRequests from "../graphs/AllPullRequests.tsx";
+import ReviewerPreference from "../graphs/ReviewerPreference.tsx";
+import ReviewRequesters from "../graphs/ReviewRequesters.tsx";
 
 export default function GithubPullRequestReviewersDashboard({ data }) {
   if (!data) return null;

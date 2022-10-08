@@ -1,6 +1,7 @@
 import { equals, prop, whereEq } from "ramda";
 import { useEffect, useRef, useState } from "react";
-import GithubPullRequestReviewersDashboard from "./_components/GithubPullRequestReviewersDashboard.tsx";
+import useEvent from "~/lib/useEvent.ts";
+import GithubPullRequestReviewersDashboard from "~/pageComponents/GithubPullRequestReviewersDashboard.tsx";
 
 const printRepository = (repo) => `${repo.owner}/${repo.name}`;
 
@@ -16,6 +17,13 @@ export default function GithubPullRequestReviewers() {
       setRepositories(repositories);
     })();
   }, []);
+
+  useEvent(window, "keydown", (event) => {
+    if (event.key === "Escape") {
+      setCurrentRepository(null);
+      setData(null);
+    }
+  });
 
   const load = async (repository) => {
     const url = new URL(
