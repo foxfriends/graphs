@@ -1,11 +1,12 @@
-import { complement, cond, path, prop, propEq, propOr } from "ramda";
+// deno-lint-ignore-file no-explicit-any
+import { cond, path, prop, propEq, propOr } from "ramda";
 import { graphql, GraphQLError } from "../graphql/mod.ts";
 import { GithubAPI } from "./client.ts";
 import { paginate } from "./paginate.ts";
-import { mapResult } from "../graphql/graphql_result.ts";
 import { ApiError } from "./api_error.ts";
 import type { PullRequest } from "./pull_request.ts";
 import type { Repository } from "./repository.ts";
+import type { User } from "./user.ts";
 
 const GET_PULL_REQUESTS_QUERY = graphql`
   query GetPullRequests($name: String!, $owner: String!, $after: String) {
@@ -22,17 +23,23 @@ const GET_PULL_REQUESTS_QUERY = graphql`
             nodes {
               requestedReviewer {
                 __typename
-                ...on User { login }
-                ...on Team {
+                ... on User {
+                  login
+                }
+                ... on Team {
                   members {
-                    nodes { login }
+                    nodes {
+                      login
+                    }
                   }
                 }
               }
             }
           }
           suggestedReviewers {
-            reviewer { login }
+            reviewer {
+              login
+            }
           }
           reviews(first: 40) {
             nodes {
@@ -55,7 +62,7 @@ const GET_PULL_REQUESTS_QUERY = graphql`
 const typenameIs = propEq("__typename");
 
 export async function getPullRequests(
-  repository: Repository,
+  repository: Repository
 ): Promise<PullRequest[]> {
   const results = await paginate(
     path(["repository", "pullRequests", "pageInfo"]),
@@ -66,37 +73,33 @@ export async function getPullRequests(
           owner: repository.owner,
           after,
         },
-      }),
+      })
   );
 
-  const errors: GraphQLError[] = results
-    .flatMap(propOr([], "errors"));
+  const errors: GraphQLError[] = results.flatMap(propOr([], "errors"));
   if (errors.length) throw new ApiError(errors);
   return results.flatMap(({ data }: any) =>
-    data
-      .repository
-      .pullRequests
-      .nodes
+    data.repository.pullRequests.nodes
       .filter(({ author }: any) => typenameIs("User", author))
       .map((pullRequest: any) => ({
         id: pullRequest.number,
         title: pullRequest.title,
         author: pullRequest.author.login,
-        requestedReviewers: pullRequest
-          .reviewRequests
-          .nodes
+        requestedReviewers: pullRequest.reviewRequests.nodes
           .map(prop("requestedReviewer"))
-          .flatMap(cond([
-            [typenameIs("User"), ({ login }: any) => [login]],
-            [typenameIs("Team"), ({ members }: any) =>
-              members.nodes.map("login")],
-          ])),
-        suggestedReviewers: pullRequest
-          .suggestedReviewers
-          .map(path(["reviewer", "login"])),
-        reviewers: pullRequest
-          .reviews
-          .nodes
+          .flatMap(
+            cond([
+              [typenameIs("User"), ({ login }: User) => [login]],
+              [
+                typenameIs("Team"),
+                ({ members }: any) => members.nodes.map("login"),
+              ],
+            ])
+          ),
+        suggestedReviewers: pullRequest.suggestedReviewers.map(
+          path(["reviewer", "login"])
+        ),
+        reviewers: pullRequest.reviews.nodes
           .map(prop("author"))
           .filter(typenameIs("User"))
           .map(prop("login")),

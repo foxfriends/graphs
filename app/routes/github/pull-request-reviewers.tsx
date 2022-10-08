@@ -1,6 +1,6 @@
 import { equals, prop, whereEq } from "ramda";
 import { useEffect, useRef, useState } from "react";
-import useEvent from "~/lib/useEvent.ts";
+import useEvent from "~/hooks/useEvent.ts";
 import GithubPullRequestReviewersDashboard from "~/pageComponents/GithubPullRequestReviewersDashboard.tsx";
 
 const printRepository = (repo) => `${repo.owner}/${repo.name}`;
@@ -28,7 +28,7 @@ export default function GithubPullRequestReviewers() {
   const load = async (repository) => {
     const url = new URL(
       "/api/github_pull_request_reviewers",
-      window.location.origin
+      window.location.origin,
     );
     url.search = new URLSearchParams(repository).toString();
     const response = await fetch(url);

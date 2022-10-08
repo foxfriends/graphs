@@ -1,7 +1,7 @@
 import { prop } from "ramda";
 import React, { Fragment, useRef } from "react";
 import * as d3 from "d3";
-import { useD3 } from "~/lib/useD3.ts";
+import { useD3 } from "~/hooks/useD3.ts";
 
 export default function HorizontalStackedBars({ bars, groups, stacks }) {
   const tooltipRef = useRef();
@@ -43,7 +43,7 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
           .text(label)
           .style(
             "transform",
-            `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`
+            `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -100%) translateY(-4px)`,
           );
       }
 
@@ -86,7 +86,7 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
 
       svg.select(".y-axis").call(yAxis);
     },
-    [bars, groups, stacks]
+    [bars, groups, stacks],
   );
 
   return (

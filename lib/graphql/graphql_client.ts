@@ -4,7 +4,7 @@ import type { GraphQLRequestOptions } from "./graphql_request_options.ts";
 export class GraphQLClient {
   constructor(private url: string, private options: RequestInit) {}
 
-  private mergeOptions(options: RequestInit): object {
+  private mergeOptions(options: RequestInit): RequestInit {
     return {
       ...this.options,
       ...options,

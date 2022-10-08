@@ -23,10 +23,12 @@ Set up the environment:
    Github API. You will get errors if the permissions are wrong, but which are
    required is not yet determined.
 4. Migrate the database using [Nessie][Nessie] (`deno task nessie migrate`)
-5. Populate the database with some data using the populate script (see `deno task populate --help`)
+5. Populate the database with some data using the populate script (see
+   `deno task populate --help`)
 
 [dotenv]: https://github.com/pietvanzoen/deno-dotenv
 [Github Personal Access Token]: https://github.com/settings/tokens
 [Nessie]: https://github.com/halvardssm/deno-nessie
 
-You should now be able to run the app by running `deno task dev` in the `app` directory.
+You should now be able to run the app by running `deno task dev` in the `app`
+directory.

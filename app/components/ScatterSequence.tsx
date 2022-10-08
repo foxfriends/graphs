@@ -1,8 +1,8 @@
 import { prop, whereEq } from "ramda";
 import React, { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
-import { useD3 } from "~/lib/useD3.ts";
 import { Set } from "immutable";
+import { useD3 } from "~/hooks/useD3.ts";
 
 export default function ScatterSequence({
   buckets,

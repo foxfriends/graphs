@@ -1,4 +1,9 @@
 {
+  "lint": {
+    "files": {
+      "exclude": ["db/migrations"]
+    }
+  },
   "tasks": {
     "populate": "deno --unstable run --import-map=populate/import_map.json --allow-net --allow-read --allow-env --allow-write populate/main.ts",
     "nessie": "deno --unstable run --import-map=db/import_map.json --allow-env --allow-read --allow-net https://deno.land/x/nessie@2.0.1/cli.ts"

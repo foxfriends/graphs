@@ -16,5 +16,5 @@ export const mapResult = curry(<T, U>(
       data: transform(result.data),
     };
   }
-  return result as any as GraphQLResult<U>;
+  return result as unknown as GraphQLResult<U>;
 });

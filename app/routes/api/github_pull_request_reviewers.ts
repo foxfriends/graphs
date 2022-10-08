@@ -41,7 +41,7 @@ export const GET = async (request) => {
       new Set([
         ...pullRequests.map(prop("author")),
         ...reviewers.map(prop("reviewer")),
-      ])
+      ]),
     );
     const { rows: users } = await db.queryObject`
     SELECT login, avatar_url as "avatarUrl"

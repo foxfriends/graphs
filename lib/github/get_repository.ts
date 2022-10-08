@@ -1,4 +1,4 @@
-import { graphql, GraphQLError } from "../graphql/mod.ts";
+import { graphql } from "../graphql/mod.ts";
 import { GithubAPI } from "./client.ts";
 import { ApiError } from "./api_error.ts";
 import type { Repository } from "./repository.ts";

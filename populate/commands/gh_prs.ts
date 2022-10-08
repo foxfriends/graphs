@@ -1,3 +1,4 @@
+import { type MapTypes } from "cliffy";
 import { transaction } from "$lib/database/transaction.ts";
 import { savePullRequest } from "$lib/database/github_pull_request.ts";
 import {
@@ -12,9 +13,9 @@ import { associatedUsers } from "$lib/github/pull_request.ts";
 import logger from "$lib/logger.ts";
 
 export async function ghPrs(
-  options: any,
+  _options: MapTypes<void>,
   repositoryOwner: string,
-  repositoryName: string,
+  repositoryName: string
 ) {
   const { name, owner } = await getRepository({
     owner: repositoryOwner,

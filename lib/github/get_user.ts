@@ -1,6 +1,5 @@
-import { assoc } from "ramda";
 import { graphql } from "../graphql/mod.ts";
-import { GraphQLResult, mapResult } from "../graphql/graphql_result.ts";
+import { GraphQLResult } from "../graphql/graphql_result.ts";
 import { GithubAPI } from "./client.ts";
 import { ApiError } from "./api_error.ts";
 import type { User } from "./user.ts";

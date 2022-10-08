@@ -66,8 +66,8 @@ export default class extends AbstractMigration<ClientPostgreSQL> {
       "github_pull_requests_reviewers_down",
     );
     await transaction.begin();
-    await transaction.queryArray
-      `DROP TABLE github_pull_request_suggested_reviewers`;
+    await transaction
+      .queryArray`DROP TABLE github_pull_request_suggested_reviewers`;
     await transaction.queryArray`DROP TABLE github_pull_request_reviewers`;
     await transaction.queryArray`DROP TABLE github_pull_requests`;
     await transaction.queryArray`DROP TABLE github_repositories`;

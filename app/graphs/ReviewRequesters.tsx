@@ -1,8 +1,8 @@
 import {
   applySpec,
-  descend,
   complement,
   compose,
+  descend,
   equals,
   find,
   inc,
@@ -22,14 +22,14 @@ export default function ReviewRequesters({ data }) {
     applySpec({
       id: prop("login"),
       image: prop("avatarUrl"),
-    })
+    }),
   );
 
   const groups = data.users.map(
     applySpec({
       id: prop("login"),
       name: prop("login"),
-    })
+    }),
   );
 
   const zero = Object.fromEntries(groups.map(({ id }) => [id, 0]));
@@ -51,9 +51,9 @@ export default function ReviewRequesters({ data }) {
         values,
         omit(["bar"]),
         (id) => find(propEq("bar", id), stacks),
-        prop("id")
-      )
-    )
+        prop("id"),
+      ),
+    ),
   );
 
   return <HorizontalStackedBars bars={bars} groups={groups} stacks={stacks} />;

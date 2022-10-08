@@ -4,12 +4,14 @@ import { LOG_FILE, LOG_LEVEL } from "./env.ts";
 const { ConsoleHandler, FileHandler, BaseHandler } = Handlers;
 
 // NOTE: could not find BaseHandler as a type, so just going with any for now
-const handlers: Record<string, any> = {
+const handlers: Record<string, typeof BaseHandler> = {
   console: new ConsoleHandler(LOG_LEVEL, {
     formatter: (logRecord) => {
       const args = logRecord.args.map((arg) => JSON.stringify(arg, null, 2));
       return [
-        `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${logRecord.msg}`,
+        `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${
+          logRecord.msg
+        }`,
         ...args,
       ].join("\n");
     },

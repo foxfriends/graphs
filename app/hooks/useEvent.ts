@@ -8,7 +8,7 @@ type EventTargetEmitter = Pick<
 export default function useEvent(
   eventTarget: EventTargetEmitter | undefined,
   event: string,
-  callback: EventListenerOrEventListenerObject | undefined
+  callback: EventListenerOrEventListenerObject | undefined,
 ) {
   useEffect(() => {
     if (callback) {

@@ -18,7 +18,9 @@ export async function transaction<T>(
     try {
       logger.debug(`Rollback transaction "${name}"`);
       await transaction.rollback();
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     throw error;
   }
 }
