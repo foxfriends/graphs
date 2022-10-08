@@ -19,7 +19,7 @@ export const GET = async (request) => {
     const { owner, name } = repository;
     console.log(`Loading pull requests for ${owner}/${name}`);
     const { rows: pullRequests } = await db.queryObject`
-    SELECT id, title, author
+    SELECT *
       FROM github_pull_requests
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
