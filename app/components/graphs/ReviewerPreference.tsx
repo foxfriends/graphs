@@ -15,7 +15,7 @@ import {
   values,
   whereEq,
 } from "ramda";
-import HorizontalStackedBars from "~/components/HorizontalStackedBars.tsx";
+import HorizontalStackedBars from "./base/HorizontalStackedBars.tsx";
 
 export default function ReviewerPreference({ data }) {
   const bars = data.users.map(

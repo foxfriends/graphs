@@ -95,10 +95,6 @@ export default function HorizontalStackedBars({ bars, groups, stacks }) {
         {`
         .horizontal-stacked-bars {
           position: relative;
-          overflow-x: auto;
-          overflow-y: hidden;
-          max-width: 100%;
-          height: 100%;
         }
 
         .horizontal-stacked-bars .tooltip {

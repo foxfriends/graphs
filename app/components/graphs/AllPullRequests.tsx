@@ -10,7 +10,7 @@ import {
   whereEq,
 } from "ramda";
 import { useState } from "react";
-import ScatterSequence from "~/components/ScatterSequence.tsx";
+import ScatterSequence from "./base/ScatterSequence.tsx";
 import { format } from "~/lib/format.ts";
 
 export default function AllPullRequests({ data }) {

@@ -1,6 +1,7 @@
 import { type ClickEventHandler } from "react";
 import { useQuery } from "~/hooks/useQuery.tsx";
 import { preventDefault } from "~/util/preventDefault.ts";
+import { type Repository } from "~/types/Repository.ts";
 
 type Props = {
   onSelect?: (repo: Repository) => void;
