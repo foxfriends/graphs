@@ -31,9 +31,15 @@ export async function savePullRequest(
 ): Promise<void> {
   logger.debug("savePullRequest", pullRequest);
   await db.queryArray`
-    INSERT INTO github_pull_requests (id, repository_owner, repository_name, title, author)
-      VALUES (${pullRequest.id}, ${pullRequest.repositoryOwner}, ${pullRequest.repositoryName}, ${pullRequest.title}, ${pullRequest.author})
+    INSERT INTO github_pull_requests (id, repository_owner, repository_name, title, author, deletions, additions, created_at, merged_at, closed_at)
+      VALUES (${pullRequest.id}, ${pullRequest.repositoryOwner}, ${pullRequest.repositoryName}, ${pullRequest.title}, ${pullRequest.author}, ${pullRequest.deletions}, ${pullRequest.additions}, ${pullRequest.createdAt}, ${pullRequest.mergedAt}, ${pullRequest.closedAt})
       ON CONFLICT (repository_owner, repository_name, id) DO UPDATE
-      SET title = ${pullRequest.title}, author = ${pullRequest.author}
+      SET title = ${pullRequest.title},
+          author = ${pullRequest.author},
+          deletions = ${pullRequest.deletions},
+          additions = ${pullRequest.additions},
+          created_at = ${pullRequest.createdAt},
+          merged_at = ${pullRequest.mergedAt},
+          closed_at = ${pullRequest.closedAt}
   `;
 }

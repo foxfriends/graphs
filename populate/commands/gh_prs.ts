@@ -37,11 +37,9 @@ export async function ghPrs(
     await saveRepository(db, repository);
     for (const pullRequest of pullRequests) {
       await savePullRequest(db, {
-        id: pullRequest.id,
+        ...pullRequest,
         repositoryOwner: repository.owner,
         repositoryName: repository.name,
-        title: pullRequest.title,
-        author: pullRequest.author,
       });
       const reviewers = new Set([
         ...pullRequest.requestedReviewers,

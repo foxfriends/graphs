@@ -5,6 +5,11 @@ export interface PullRequest {
   requestedReviewers: string[];
   suggestedReviewers: string[];
   reviewers: string[];
+  deletions: number;
+  additions: number;
+  createdAt: string | null;
+  mergedAt: string | null;
+  closedAt: string | null;
 }
 
 export function associatedUsers(pr: PullRequest): string[] {

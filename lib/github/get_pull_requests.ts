@@ -19,6 +19,12 @@ const GET_PULL_REQUESTS_QUERY = graphql`
             login
           }
           title
+          changedFiles
+          deletions
+          additions
+          createdAt
+          mergedAt
+          closedAt
           reviewRequests(first: 20) {
             nodes {
               requestedReviewer {
@@ -85,6 +91,11 @@ export async function getPullRequests(
         id: pullRequest.number,
         title: pullRequest.title,
         author: pullRequest.author.login,
+        deletions: pullRequest.deletions,
+        additions: pullRequest.additions,
+        createdAt: pullRequest.createdAt,
+        mergedAt: pullRequest.mergedAt,
+        closedAt: pullRequest.closedAt,
         requestedReviewers: pullRequest.reviewRequests.nodes
           .map(prop("requestedReviewer"))
           .flatMap(
