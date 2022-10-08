@@ -62,7 +62,7 @@ export default function AllPullRequests({ data }) {
         prop("author"),
       ),
     }),
-  );
+  ).filter(({ bucket, owningBucket }) => bucket !== owningBucket);
 
   const points = [...authors, ...reviewers];
 
