@@ -9,9 +9,7 @@ const handlers: Record<string, typeof BaseHandler> = {
     formatter: (logRecord) => {
       const args = logRecord.args.map((arg) => JSON.stringify(arg, null, 2));
       return [
-        `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${
-          logRecord.msg
-        }`,
+        `${logRecord.datetime.toISOString()} - [${logRecord.levelName}]: ${logRecord.msg}`,
         ...args,
       ].join("\n");
     },

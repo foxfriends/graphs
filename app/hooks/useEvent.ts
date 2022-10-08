@@ -5,7 +5,7 @@ type EventTargetEmitter = Pick<
   "addEventListener" | "removeEventListener"
 >;
 
-export default function useEvent(
+export function useEvent(
   eventTarget: EventTargetEmitter | undefined,
   event: string,
   callback: EventListenerOrEventListenerObject | undefined,

@@ -3,7 +3,7 @@ import { client } from "./client.ts";
 import logger from "../logger.ts";
 
 export async function transaction<T>(
-  callback: (db: Transaction) => Promise<T>
+  callback: (db: Transaction) => Promise<T>,
 ): Promise<T> {
   const name = callback.name ?? "Anonymous transaction";
   const transaction = await client.createTransaction(name);

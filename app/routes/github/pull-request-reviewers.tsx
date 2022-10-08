@@ -1,76 +1,46 @@
 import { equals, prop, whereEq } from "ramda";
 import { useEffect, useRef, useState } from "react";
-import useEvent from "~/hooks/useEvent.ts";
-import GithubPullRequestReviewersDashboard from "~/pageComponents/GithubPullRequestReviewersDashboard.tsx";
+import { useEvent } from "~/hooks/useEvent.ts";
+import { useQuery } from "~/hooks/useQuery.tsx";
+import GithubRepositoryList from "~/components/GithubRepositoryList.tsx";
+import GithubPullRequestReviewersPage from "~/pageComponents/GithubPullRequestReviewersPage/mod.ts";
 
-const printRepository = (repo) => `${repo.owner}/${repo.name}`;
+async function getGithubPullRequestReviewers(repository) {
+  if (!repository) return;
+  const url = new URL(
+    "/api/github_pull_request_reviewers",
+    window.location.origin,
+  );
+  url.search = new URLSearchParams(repository).toString();
+  const response = await fetch(url);
+  if (response.status !== 200) {
+    throw new Error("Error");
+  }
+  return response.json();
+}
 
 export default function GithubPullRequestReviewers() {
-  const [repositories, setRepositories] = useState([]);
   const [currentRepository, setCurrentRepository] = useState();
-  const [data, setData] = useState();
-
-  useEffect(() => {
-    void (async () => {
-      const response = await fetch("/api/github_repositories");
-      const { repositories } = await response.json();
-      setRepositories(repositories);
-    })();
-  }, []);
+  const { data } = useQuery(getGithubPullRequestReviewers, [currentRepository]);
 
   useEvent(window, "keydown", (event) => {
     if (event.key === "Escape") {
       setCurrentRepository(null);
-      setData(null);
     }
   });
 
-  const load = async (repository) => {
-    const url = new URL(
-      "/api/github_pull_request_reviewers",
-      window.location.origin,
-    );
-    url.search = new URLSearchParams(repository).toString();
-    const response = await fetch(url);
-    if (response.status !== 200) {
-      return;
-    }
-    setCurrentRepository(repository);
-    setData(await response.json());
-  };
-
   if (currentRepository) {
-    return <GithubPullRequestReviewersDashboard data={data} />;
+    return <GithubPullRequestReviewersPage data={data} />;
   } else {
     return (
-      <>
-        <style>
-          {`
-          .choose-repository {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding: 16px;
-            align-items: flex-start;
-          }
-
-          .repository {
-            padding: 8px;
-          }
-        `}
-        </style>
-        <div className="choose-repository">
-          {repositories.map((repository) => (
-            <button
-              className="repository"
-              onClick={() => load(repository)}
-              key={printRepository(repository)}
-            >
-              {printRepository(repository)}
-            </button>
-          ))}
-        </div>
-      </>
+      <div className="l-center">
+        <header className="l-box pb-s1">
+          <h1>Choose GitHub Repository</h1>
+        </header>
+        <main>
+          <GithubRepositoryList onSelect={setCurrentRepository} />
+        </main>
+      </div>
     );
   }
 }

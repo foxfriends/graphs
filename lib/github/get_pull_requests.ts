@@ -62,7 +62,7 @@ const GET_PULL_REQUESTS_QUERY = graphql`
 const typenameIs = propEq("__typename");
 
 export async function getPullRequests(
-  repository: Repository
+  repository: Repository,
 ): Promise<PullRequest[]> {
   const results = await paginate(
     path(["repository", "pullRequests", "pageInfo"]),
@@ -73,7 +73,7 @@ export async function getPullRequests(
           owner: repository.owner,
           after,
         },
-      })
+      }),
   );
 
   const errors: GraphQLError[] = results.flatMap(propOr([], "errors"));
@@ -94,10 +94,10 @@ export async function getPullRequests(
                 typenameIs("Team"),
                 ({ members }: any) => members.nodes.map("login"),
               ],
-            ])
+            ]),
           ),
         suggestedReviewers: pullRequest.suggestedReviewers.map(
-          path(["reviewer", "login"])
+          path(["reviewer", "login"]),
         ),
         reviewers: pullRequest.reviews.nodes
           .map(prop("author"))

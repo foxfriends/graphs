@@ -15,7 +15,7 @@ import logger from "$lib/logger.ts";
 export async function ghPrs(
   _options: MapTypes<void>,
   repositoryOwner: string,
-  repositoryName: string
+  repositoryName: string,
 ) {
   const { name, owner } = await getRepository({
     owner: repositoryOwner,

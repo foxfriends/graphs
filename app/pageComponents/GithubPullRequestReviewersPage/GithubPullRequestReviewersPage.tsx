@@ -1,8 +1,8 @@
-import AllPullRequests from "../graphs/AllPullRequests.tsx";
-import ReviewerPreference from "../graphs/ReviewerPreference.tsx";
-import ReviewRequesters from "../graphs/ReviewRequesters.tsx";
+import AllPullRequests from "~/graphs/AllPullRequests.tsx";
+import ReviewerPreference from "~/graphs/ReviewerPreference.tsx";
+import ReviewRequesters from "~/graphs/ReviewRequesters.tsx";
 
-export default function GithubPullRequestReviewersDashboard({ data }) {
+export default function GithubPullRequestReviewersPage({ data }) {
   if (!data) return null;
   return (
     <div className="dashboard">

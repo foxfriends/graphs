@@ -1,0 +1,38 @@
+@layer components {
+  .l-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  .l-stack > * { margin-block: 0 }
+  .l-stack:not(.recursive) > * + * { margin-block-start: var(--space, 0) }
+  .l-stack.recursive * + * { margin-block-start: var(--space, 0) }
+
+  .l-box {
+    padding: 0;
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .l-center {
+    box-sizing: content-box;
+    margin-inline: auto;
+    max-inline-size: var(--measure);
+  }
+}
+
+@layer utilities {
+  .space-s0 { --space: var(--s0) }
+  .space-s1 { --space: var(--s1) }
+
+  .p-s0 { padding: var(--s0) }
+  .pi-s0 { padding-inline: var(--s0) }
+  .pb-s0 { padding-block: var(--s0) }
+  .p-s1 { padding: var(--s1) }
+  .pi-s1 { padding-inline: var(--s1) }
+  .pb-s1 { padding-block: var(--s1) }
+  .p-s2 { padding: var(--s2) }
+  .pi-s2 { padding-inline: var(--s2) }
+  .pb-s2 { padding-block: var(--s2) }
+}

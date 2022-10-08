@@ -1,0 +1,14 @@
+@layer components {
+  button {
+    border-width: 1px;
+    border-color: black;
+    padding-block: var(--s-1);
+    cursor: pointer;
+  }
+
+  a {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+  }
+}

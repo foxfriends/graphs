@@ -7,6 +7,6 @@ await new Command()
   .description("Data aggregator for the graphs.")
   .command(
     "gh-prs",
-    new Command().arguments("<owner:string> <repository:string>").action(ghPrs)
+    new Command().arguments("<owner:string> <repository:string>").action(ghPrs),
   )
   .parse(Deno.args);
