@@ -12,6 +12,7 @@ import {
   prop,
   propEq,
   sum,
+  uniq,
   values,
   whereEq,
 } from "ramda";
@@ -37,9 +38,13 @@ export default function ReviewerPreference({ data }) {
     data.pullRequests
       .filter(whereEq({ author: bar.id }))
       .flatMap(({ id }) =>
-        data.reviewers.filter(whereEq({ pullRequestId: id }))
+        uniq(
+          [...data.requestedReviewers, ...data.reviews].filter(
+            whereEq({ pullRequestId: id }),
+          )
+            .map(prop("reviewer")),
+        )
       )
-      .map(prop("reviewer"))
       .filter(complement(equals(bar.id)))
       .reduce((count, name) => over(lensProp(name), inc, count), zero);
   const stacks = bars.map((bar) => ({ bar: bar.id, ...stackForBar(bar) }));

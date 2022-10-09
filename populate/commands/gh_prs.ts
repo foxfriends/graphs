@@ -8,6 +8,7 @@ import {
 import { saveUser } from "$lib/database/github_user.ts";
 import { savePullRequestReviewer } from "$lib/database/github_pull_request_reviewer.ts";
 import { savePullRequestSuggestedReviewer } from "$lib/database/github_pull_request_suggested_reviewer.ts";
+import { savePullRequestReview } from "$lib/database/github_pull_request_review.ts";
 import { getPullRequests, getRepository, getUser } from "$lib/github/mod.ts";
 import { associatedUsers } from "$lib/github/pull_request.ts";
 import logger from "$lib/logger.ts";
@@ -41,16 +42,20 @@ export async function ghPrs(
         repositoryOwner: repository.owner,
         repositoryName: repository.name,
       });
-      const reviewers = new Set([
-        ...pullRequest.requestedReviewers,
-        ...pullRequest.reviewers,
-      ]);
-      for (const reviewer of reviewers) {
+      for (const reviewer of pullRequest.requestedReviewers) {
         await savePullRequestReviewer(db, {
           pullRequestId: pullRequest.id,
           repositoryOwner: repository.owner,
           repositoryName: repository.name,
           reviewer,
+        });
+      }
+      for (const review of pullRequest.reviews) {
+        await savePullRequestReview(db, {
+          pullRequestId: pullRequest.id,
+          repositoryOwner: repository.owner,
+          repositoryName: repository.name,
+          ...review,
         });
       }
       for (const reviewer of pullRequest.suggestedReviewers) {

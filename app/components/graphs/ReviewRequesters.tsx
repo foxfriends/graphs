@@ -12,6 +12,7 @@ import {
   prop,
   propEq,
   sum,
+  uniq,
   values,
   whereEq,
 } from "ramda";
@@ -34,9 +35,12 @@ export default function ReviewRequesters({ data }) {
 
   const zero = Object.fromEntries(groups.map(({ id }) => [id, 0]));
   const stackForBar = (bar) =>
-    data.reviewers
-      .filter(whereEq({ reviewer: bar.id }))
-      .map(({ pullRequestId }) =>
+    uniq(
+      [...data.requestedReviewers, ...data.reviews]
+        .filter(whereEq({ reviewer: bar.id }))
+        .map(prop("pullRequestId")),
+    )
+      .map((pullRequestId) =>
         data.pullRequests.find(whereEq({ id: pullRequestId }))
       )
       .map(prop("author"))

@@ -12,7 +12,7 @@ export const GET = async (request) => {
       FROM github_repositories
       WHERE name ILIKE ${searchParams.get("name")}
         AND owner ILIKE ${searchParams.get("owner")}
-  `;
+    `;
     if (!repository) {
       return Response.json({ error: "Not Found" }, { status: 404 });
     }
@@ -25,7 +25,7 @@ export const GET = async (request) => {
         AND repository_name = ${name}
   `;
     console.log(`${pullRequests.length} pull requests found`);
-    const { rows: reviewers } = await db.queryObject`
+    const { rows: requestedReviewers } = await db.queryObject`
     SELECT pull_request_id as "pullRequestId", reviewer
       FROM github_pull_request_reviewers
       WHERE repository_owner = ${owner}
@@ -37,10 +37,18 @@ export const GET = async (request) => {
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
   `;
+    const { rows: reviews } = await db.queryObject`
+    SELECT id, pull_request_id as "pullRequestId", reviewer, comment_count as "commentCount", submitted_at as "submittedAt"
+      FROM github_pull_request_reviews
+      WHERE repository_owner = ${owner}
+        AND repository_name = ${name}
+  `;
     const logins = Array.from(
       new Set([
         ...pullRequests.map(prop("author")),
-        ...reviewers.map(prop("reviewer")),
+        ...reviews.map(prop("reviewer")),
+        ...requestedReviewers.map(prop("reviewer")),
+        ...suggestedReviewers.map(prop("reviewer")),
       ]),
     );
     const { rows: users } = await db.queryObject`
@@ -52,7 +60,8 @@ export const GET = async (request) => {
 
     return Response.json({
       users,
-      reviewers,
+      requestedReviewers,
+      reviews,
       suggestedReviewers,
       pullRequests,
     });

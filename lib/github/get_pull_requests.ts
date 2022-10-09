@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { cond, path, prop, propEq, propOr } from "ramda";
+import { cond, path, pipe, prop, propEq, propOr } from "ramda";
 import { graphql, GraphQLError } from "../graphql/mod.ts";
 import { GithubAPI } from "./client.ts";
 import { paginate } from "./paginate.ts";
@@ -49,6 +49,9 @@ const GET_PULL_REQUESTS_QUERY = graphql`
           }
           reviews(first: 40) {
             nodes {
+              databaseId
+              submittedAt
+              comments { totalCount }
               author {
                 __typename
                 login
@@ -110,10 +113,14 @@ export async function getPullRequests(
         suggestedReviewers: pullRequest.suggestedReviewers.map(
           path(["reviewer", "login"]),
         ),
-        reviewers: pullRequest.reviews.nodes
-          .map(prop("author"))
-          .filter(typenameIs("User"))
-          .map(prop("login")),
+        reviews: pullRequest.reviews.nodes
+          .filter(pipe(prop("author"), typenameIs("User")))
+          .map((review: any) => ({
+            id: review.databaseId,
+            submittedAt: review.submittedAt,
+            commentCount: review.comments.totalCount,
+            reviewer: review.author.login,
+          })),
       }))
   ) as PullRequest[];
 }
