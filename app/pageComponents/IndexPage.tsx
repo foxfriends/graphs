@@ -26,6 +26,11 @@ export default function IndexPage() {
               GitHub Pull Request Time To Merge
             </a>
           </li>
+          <li>
+            <a href="/github/time-to-first-review">
+              GitHub Pull Request Time To First Review
+            </a>
+          </li>
         </ul>
       </main>
     </div>
