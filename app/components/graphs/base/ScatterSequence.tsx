@@ -84,7 +84,7 @@ export default function ScatterSequence(
           .attr("y", (d) => y(d.id))
           .attr("width", y.bandwidth())
           .attr("height", y.bandwidth())
-          .attr("xlink:href", (d) => d.image)
+          .attr("href", (d) => d.image)
           .style("opacity", (d) => (bucketsHidden.has(d.id) ? 0.5 : 1))
           .style("cursor", "pointer")
           .on("click", toggleBucket);
@@ -136,7 +136,7 @@ export default function ScatterSequence(
         .attr("y1", 0)
         .attr("y2", height)
         .attr("stroke", "#000000")
-        .attr("opacity", 0.1);
+        .attr("opacity", 0.02);
 
       svg.select(".y-axis").call(yAxis);
     },
@@ -161,7 +161,7 @@ export default function ScatterSequence(
         `}
       </style>
       <div className="chart scatter-sequence" ref={setContainer}>
-        <svg ref={ref} className="graph">
+        <svg ref={ref} className="graph" xmlns="http://www.w3.org/2000/svg">
           <g className="y-axis" />
           <g className="points" />
           <g className="segments" />

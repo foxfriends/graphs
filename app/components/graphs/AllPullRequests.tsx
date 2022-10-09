@@ -25,16 +25,33 @@ export default function AllPullRequests(
     requested: "#f5faed",
   };
 
+  // deno-fmt-ignore
+  const prKey = format`${prop("repositoryOwner")}/${prop("repositoryName")}#${prop("id")}`;
+  const pullRequestIndex = new Map(
+    pullRequests.map((pr) => [prKey(pr), pr]),
+  );
+  const findPullRequest = (
+    { pullRequestId: id, repositoryName, repositoryOwner },
+  ) => pullRequestIndex.get(prKey({ id, repositoryName, repositoryOwner }));
+
   const userOrder = Object.fromEntries(
     users.map(({ login }) => [
       login,
       Math.min(
         ...reviews
           .filter(whereEq({ reviewer: login }))
-          .map(prop("pullRequestId")),
+          .map(findPullRequest)
+          .map(prop("createdAt"))
+          .map((d) => new Date(d)),
+        ...pullRequests
+          .filter(whereEq({ author: login }))
+          .map(prop("createdAt"))
+          .map((d) => new Date(d)),
         ...requestedReviewers
           .filter(whereEq({ reviewer: login }))
-          .map(prop("pullRequestId")),
+          .map(findPullRequest)
+          .map(prop("createdAt"))
+          .map((d) => new Date(d)),
       ),
     ]),
   );
@@ -50,14 +67,6 @@ export default function AllPullRequests(
     prop("createdAt"),
   );
 
-  // deno-fmt-ignore
-  const prKey = format`${prop("repositoryOwner")}/${prop("repositoryName")}#${prop("id")}`;
-  const pullRequestIndex = new Map(
-    pullRequests.map((pr) => [prKey(pr), pr]),
-  );
-  const findPullRequest = (
-    { pullRequestId: id, repositoryName, repositoryOwner },
-  ) => pullRequestIndex.get(prKey({ id, repositoryName, repositoryOwner }));
   // deno-fmt-ignore
   const tooltipText = format`${prKey}: ${prop("title")}`;
   const authorPoints = pullRequests.map(
