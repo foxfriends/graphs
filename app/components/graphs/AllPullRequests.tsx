@@ -1,6 +1,7 @@
 import {
   __,
   always,
+  aperture,
   applySpec,
   ascend,
   compose,
@@ -13,8 +14,11 @@ import {
 import { useState } from "react";
 import ScatterSequence from "./base/ScatterSequence.tsx";
 import { format } from "~/lib/format.ts";
+import { getPath, setPath } from "~/util/cache.ts";
 
-export default function AllPullRequests({ data }) {
+export default function AllPullRequests(
+  { pullRequests, reviews, requestedReviewers, users },
+) {
   const colors = {
     author: "#3db843",
     reviewer: "#d5daad",
@@ -22,19 +26,19 @@ export default function AllPullRequests({ data }) {
   };
 
   const userOrder = Object.fromEntries(
-    data.users.map(({ login }) => [
+    users.map(({ login }) => [
       login,
       Math.min(
-        ...data.reviews
+        ...reviews
           .filter(whereEq({ reviewer: login }))
           .map(prop("pullRequestId")),
-        ...data.requestedReviewers
+        ...requestedReviewers
           .filter(whereEq({ reviewer: login }))
           .map(prop("pullRequestId")),
       ),
     ]),
   );
-  const buckets = data.users
+  const buckets = users
     .map(
       applySpec({
         id: prop("login"),
@@ -42,39 +46,48 @@ export default function AllPullRequests({ data }) {
       }),
     )
     .sort(ascend(compose(prop(__, userOrder), prop("id"))));
-  const sequence = data.pullRequests.sort(ascend(prop("id")));
-  const findPullRequest = (id) => data.pullRequests.find(whereEq({ id }));
-  const tooltipText = format`#${prop("id")}: ${prop("title")}`;
-  const authors = data.pullRequests.map(
+  const sequence = pullRequests.sort(ascend(prop("createdAt"))).map(
+    prop("createdAt"),
+  );
+
+  // deno-fmt-ignore
+  const prKey = format`${prop("repositoryOwner")}/${prop("repositoryName")}#${prop("id")}`;
+  const pullRequestIndex = new Map(
+    pullRequests.map((pr) => [prKey(pr), pr]),
+  );
+  const findPullRequest = (
+    { pullRequestId: id, repositoryName, repositoryOwner },
+  ) => pullRequestIndex.get(prKey({ id, repositoryName, repositoryOwner }));
+  // deno-fmt-ignore
+  const tooltipText = format`${prKey}: ${prop("title")}`;
+  const authorPoints = pullRequests.map(
     applySpec({
       bucket: prop("author"),
-      sequence: prop("id"),
+      sequence: prop("createdAt"),
       color: always(colors.author),
       tooltip: tooltipText,
       owningBucket: prop("author"),
     }),
   );
-  const reviewers = data.requestedReviewers.map(
+  const reviewerPoints = requestedReviewers.map(
     applySpec({
       bucket: prop("reviewer"),
-      sequence: prop("pullRequestId"),
+      sequence: pipe(findPullRequest, prop("createdAt")),
       color: always(colors.requested),
-      tooltip: pipe(prop("pullRequestId"), findPullRequest, tooltipText),
+      tooltip: pipe(findPullRequest, tooltipText),
       owningBucket: pipe(
-        prop("pullRequestId"),
         findPullRequest,
         prop("author"),
       ),
     }),
   ).filter(({ bucket, owningBucket }) => bucket !== owningBucket);
-  const reviews = data.reviews.map(
+  const reviewPoints = reviews.map(
     applySpec({
       bucket: prop("reviewer"),
-      sequence: prop("pullRequestId"),
+      sequence: pipe(findPullRequest, prop("createdAt")),
       color: always(colors.reviewer),
-      tooltip: pipe(prop("pullRequestId"), findPullRequest, tooltipText),
+      tooltip: pipe(findPullRequest, tooltipText),
       owningBucket: pipe(
-        prop("pullRequestId"),
         findPullRequest,
         prop("author"),
       ),
@@ -82,9 +95,21 @@ export default function AllPullRequests({ data }) {
   ).filter(({ bucket, owningBucket }) => bucket !== owningBucket);
 
   const key = (rev) => [rev.bucket, rev.sequence];
-  const points = uniqBy(key, [...authors, ...reviewers, ...reviews]);
+  const points = uniqBy(key, [
+    ...authorPoints,
+    ...reviewerPoints,
+    ...reviewPoints,
+  ]);
+  const segments = aperture(2, sequence).filter((
+    [a, b],
+  ) => new Date(a).getDate() != new Date(b).getDate());
 
   return (
-    <ScatterSequence buckets={buckets} sequence={sequence} points={points} />
+    <ScatterSequence
+      buckets={buckets}
+      sequence={sequence}
+      points={points}
+      segments={segments}
+    />
   );
 }

@@ -4,6 +4,7 @@ import { preventDefault } from "~/util/preventDefault.ts";
 import { type Repository } from "~/types/Repository.ts";
 
 type Props = {
+  selected?: Repository[];
   onSelect?: (repo: Repository) => void;
 };
 
@@ -15,7 +16,7 @@ async function getRepositories() {
   return repositories;
 }
 
-export default function GithubRepositoryList({ onSelect }: Props) {
+export default function GithubRepositoryList({ selected, onSelect }: Props) {
   const { data: repositories = [] } = useQuery(getRepositories, []);
 
   return (
@@ -24,6 +25,13 @@ export default function GithubRepositoryList({ onSelect }: Props) {
         <li
           key={printRepository(repository)}
         >
+          {selected && (
+            <input
+              type="checkbox"
+              checked={selected.includes(repository)}
+              disabled
+            />
+          )}
           <a href="" onClick={preventDefault(() => onSelect(repository))}>
             {printRepository(repository)}
           </a>

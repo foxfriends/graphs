@@ -21,10 +21,10 @@ const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export default function PullRequestTimeToMerge({ pullRequests }) {
   const points = pullRequests
-    .filter(({ merged_at }) => !!merged_at)
-    .map(({ author, created_at, merged_at }) => ({
+    .filter(({ mergedAt }) => !!mergedAt)
+    .map(({ author, createdAt, mergedAt }) => ({
       group: author,
-      value: (new Date(merged_at) - new Date(created_at)) /
+      value: (new Date(mergedAt) - new Date(createdAt)) /
         MILLISECONDS_PER_DAY,
     }));
 

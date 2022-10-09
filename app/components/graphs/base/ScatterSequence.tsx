@@ -22,9 +22,12 @@ type Props = {
   buckets: Bucket[];
   sequence: Sequence[];
   points: Point[];
+  segments?: [string, string][];
 };
 
-export default function ScatterSequence({ buckets, sequence, points }: Props) {
+export default function ScatterSequence(
+  { buckets, sequence, points, segments = [] }: Props,
+) {
   const tooltipRef = useRef();
   const [container, setContainer] = useState(null);
   const { width = 0, height = 0, left = 0, top = 0 } =
@@ -49,9 +52,7 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
   );
   const relevantSequence = useMemo(
     () =>
-      sequence.filter(({ id }) =>
-        relevantPoints.find(whereEq({ sequence: id }))
-      ),
+      sequence.filter((sequence) => relevantPoints.find(whereEq({ sequence }))),
     [relevantPoints],
   );
 
@@ -68,7 +69,7 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
 
       const x = d3
         .scaleBand()
-        .domain(relevantSequence.map(prop("id")))
+        .domain(relevantSequence)
         .range([margin.left + 1, width]);
 
       const yAxis = (g) =>
@@ -126,11 +127,23 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         .on("mouseover", showTooltip)
         .on("mouseout", hideTooltip);
 
+      svg.select(".segments")
+        .selectAll("line")
+        .data(segments)
+        .join("line")
+        .attr("x1", (d) => x(d[1]) - 1)
+        .attr("x2", (d) => x(d[1]) - 1)
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke", "#000000")
+        .attr("opacity", 0.1);
+
       svg.select(".y-axis").call(yAxis);
     },
     [
       bucketsHidden,
       buckets,
+      segments,
       relevantPoints,
       relevantSequence,
       width,
@@ -151,6 +164,7 @@ export default function ScatterSequence({ buckets, sequence, points }: Props) {
         <svg ref={ref} className="graph">
           <g className="y-axis" />
           <g className="points" />
+          <g className="segments" />
         </svg>
         <div className="tooltip" ref={tooltipRef} />
       </div>

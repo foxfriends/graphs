@@ -19,26 +19,26 @@ export const GET = async (request) => {
     const { owner, name } = repository;
     console.log(`Loading pull requests for ${owner}/${name}`);
     const { rows: pullRequests } = await db.queryObject`
-    SELECT *
+    SELECT id, repository_name as "repositoryName", repository_owner as "repositoryOwner", title, author, additions, deletions, created_at as "createdAt", merged_at as "mergedAt", closed_at as "closedAt"
       FROM github_pull_requests
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
   `;
     console.log(`${pullRequests.length} pull requests found`);
     const { rows: requestedReviewers } = await db.queryObject`
-    SELECT pull_request_id as "pullRequestId", reviewer
+    SELECT pull_request_id as "pullRequestId", reviewer, repository_name as "repositoryName", repository_owner as "repositoryOwner"
       FROM github_pull_request_reviewers
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
   `;
     const { rows: suggestedReviewers } = await db.queryObject`
-    SELECT pull_request_id as "pullRequestId", reviewer
+    SELECT pull_request_id as "pullRequestId", reviewer, repository_name as "repositoryName", repository_owner as "repositoryOwner"
       FROM github_pull_request_suggested_reviewers
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
   `;
     const { rows: reviews } = await db.queryObject`
-    SELECT id, pull_request_id as "pullRequestId", reviewer, comment_count as "commentCount", submitted_at as "submittedAt"
+    SELECT id, pull_request_id as "pullRequestId", reviewer, comment_count as "commentCount", submitted_at as "submittedAt", repository_name as "repositoryName", repository_owner as "repositoryOwner"
       FROM github_pull_request_reviews
       WHERE repository_owner = ${owner}
         AND repository_name = ${name}
