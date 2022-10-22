@@ -1,7 +1,7 @@
 {
   "lint": {
     "files": {
-      "exclude": ["db/migrations"]
+      "exclude": ["db/migrations", "app/.aleph"]
     }
   },
   "tasks": {

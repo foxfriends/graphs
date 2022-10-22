@@ -12,6 +12,11 @@ export default function IndexPage() {
             </a>
           </li>
           <li>
+            <a href="/github/pull-request-over-time">
+              GitHub Pull Requests Over Time
+            </a>
+          </li>
+          <li>
             <a href="/github/reviewer-preference">
               GitHub Reviewer Preference
             </a>
