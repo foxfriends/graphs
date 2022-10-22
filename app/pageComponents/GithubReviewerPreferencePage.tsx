@@ -2,19 +2,31 @@ import ReviewerPreference from "~/components/graphs/ReviewerPreference.tsx";
 import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
+import { aggregateRepositoryData } from "~/util/aggregateRepositoryData.ts";
 
 type Props = {
-  repository: Repository;
+  repositories: Repository[];
 };
 
-export default function GithubPullRequestFrequencyPage(
-  { repository }: Props,
+export default function GithubReviewerPreferencePage(
+  { repositories }: Props,
 ) {
-  const { data } = useGithubPullRequestReviewers(repository);
-  if (!data) return null;
+  const alldata = repositories.map((repository) =>
+    useGithubPullRequestReviewers(repository)
+  );
+  const loaded = alldata.every(({ data }) => !!data);
+  if (!loaded) return null;
+  const { users, pullRequests, reviews, requestedReviewers } =
+    aggregateRepositoryData(alldata);
+
   return (
     <Movable>
-      <ReviewerPreference data={data} />
+      <ReviewerPreference
+        pullRequests={pullRequests}
+        requestedReviewers={requestedReviewers}
+        reviews={reviews}
+        users={users}
+      />
     </Movable>
   );
 }

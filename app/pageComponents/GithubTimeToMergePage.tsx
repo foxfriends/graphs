@@ -4,17 +4,22 @@ import PullRequestTimeToMerge from "~/components/graphs/PullRequestTimeToMerge.t
 import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
+import { aggregateRepositoryData } from "~/util/aggregateRepositoryData.ts";
 
 type Props = {
-  repository: Repository;
+  repositories: Repository[];
 };
 
 export default function GithubTimeToMergePage(
-  { repository }: Props,
+  { repositories }: Props,
 ) {
   const [excludedAuthors, setExcludedAuthors] = useState([]);
-  const { data } = useGithubPullRequestReviewers(repository);
-  if (!data) return null;
+  const alldata = repositories.map((repository) =>
+    useGithubPullRequestReviewers(repository)
+  );
+  const loaded = alldata.every(({ data }) => !!data);
+  if (!loaded) return null;
+  const data = aggregateRepositoryData(alldata);
 
   const allAuthors = uniq(data.pullRequests.map(prop("author")));
   const toggleAuthor = (author) => {

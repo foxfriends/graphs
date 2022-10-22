@@ -2,19 +2,30 @@ import ReviewRequesters from "~/components/graphs/ReviewRequesters.tsx";
 import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
+import { aggregateRepositoryData } from "~/util/aggregateRepositoryData.ts";
 
 type Props = {
-  repository: Repository;
+  repositories: Repository[];
 };
 
 export default function GithubReviewRequestersPage(
-  { repository }: Props,
+  { repositories }: Props,
 ) {
-  const { data } = useGithubPullRequestReviewers(repository);
-  if (!data) return null;
+  const alldata = repositories.map((repository) =>
+    useGithubPullRequestReviewers(repository)
+  );
+  const loaded = alldata.every(({ data }) => !!data);
+  if (!loaded) return null;
+  const { users, pullRequests, reviews, requestedReviewers } =
+    aggregateRepositoryData(alldata);
   return (
     <Movable>
-      <ReviewRequesters data={data} />
+      <ReviewRequesters
+        pullRequests={pullRequests}
+        requestedReviewers={requestedReviewers}
+        reviews={reviews}
+        users={users}
+      />
     </Movable>
   );
 }

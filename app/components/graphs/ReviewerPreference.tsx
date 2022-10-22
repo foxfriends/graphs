@@ -18,15 +18,21 @@ import {
 } from "ramda";
 import HorizontalStackedBars from "./base/HorizontalStackedBars.tsx";
 
-export default function ReviewerPreference({ data }) {
-  const bars = data.users.map(
+const prkey = (pr) => `${pr.repositoryOwner}/${pr.repositoryName}#${pr.id}`;
+const revprkey = (rev) =>
+  `${rev.repositoryOwner}/${rev.repositoryName}#${rev.pullRequestId}`;
+
+export default function ReviewerPreference(
+  { users, pullRequests, requestedReviewers, reviews },
+) {
+  const bars = users.map(
     applySpec({
       id: prop("login"),
       image: prop("avatarUrl"),
     }),
   );
 
-  const groups = data.users.map(
+  const groups = users.map(
     applySpec({
       id: prop("login"),
       name: prop("login"),
@@ -35,12 +41,12 @@ export default function ReviewerPreference({ data }) {
 
   const zero = Object.fromEntries(groups.map(({ id }) => [id, 0]));
   const stackForBar = (bar) =>
-    data.pullRequests
+    pullRequests
       .filter(whereEq({ author: bar.id }))
-      .flatMap(({ id }) =>
+      .flatMap((pr) =>
         uniq(
-          [...data.requestedReviewers, ...data.reviews].filter(
-            whereEq({ pullRequestId: id }),
+          [...requestedReviewers, ...reviews].filter((rev) =>
+            revprkey(rev) === prkey(pr)
           )
             .map(prop("reviewer")),
         )

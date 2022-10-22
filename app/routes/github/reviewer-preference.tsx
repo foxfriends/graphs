@@ -1,10 +1,12 @@
-import GithubRepositoryPicker from "~/components/GithubRepositoryPicker.tsx";
+import GithubRepositoryMultiPicker from "~/components/GithubRepositoryMultiPicker.tsx";
 import GithubReviewerPreferencePage from "~/pageComponents/GithubReviewerPreferencePage.tsx";
 
 export default function GithubPullRequestReviewers() {
   return (
-    <GithubRepositoryPicker>
-      {(repository) => <GithubReviewerPreferencePage repository={repository} />}
-    </GithubRepositoryPicker>
+    <GithubRepositoryMultiPicker>
+      {(repositories) => (
+        <GithubReviewerPreferencePage repositories={repositories} />
+      )}
+    </GithubRepositoryMultiPicker>
   );
 }

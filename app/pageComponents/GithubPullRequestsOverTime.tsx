@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { prop, uniqBy } from "ramda";
 import PullRequestsOverTime from "~/components/graphs/PullRequestsOverTime.tsx";
 import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
+import { aggregateRepositoryData } from "~/util/aggregateRepositoryData.ts";
 
 type Props = {
   repositories: Repository;
@@ -18,18 +18,8 @@ export default function GithubPullRequestsOverTime(
   );
   const loaded = alldata.every(({ data }) => !!data);
   if (!loaded) return null;
-
-  const pullRequests = alldata.map(prop("data")).reduce(
-    (all, { pullRequests }) => [...all, ...pullRequests],
-    [],
-  );
-  const users = uniqBy(
-    prop("login"),
-    alldata.map(prop("data")).reduce(
-      (all, { users }) => [...all, ...users],
-      [],
-    ),
-  );
+  const { pullRequests, reviews, requestedReviewers, users } =
+    aggregateRepositoryData(alldata);
 
   return (
     <>

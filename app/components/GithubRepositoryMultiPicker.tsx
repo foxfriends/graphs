@@ -12,8 +12,6 @@ export default function GithubRepositoryMultiPicker({ children }: Props) {
   const [repositories, setRepositories] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
-  console.log(repositories);
-
   function toggleRepository(repository: Repository) {
     if (repositories.includes(repository)) {
       setRepositories(reject(equals(repository)));

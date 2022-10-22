@@ -1,8 +1,8 @@
-import { prop, uniqBy } from "ramda";
 import AllPullRequests from "~/components/graphs/AllPullRequests.tsx";
 import Movable from "~/components/Movable.tsx";
 import { type Repository } from "~/types/Repository.ts";
 import { useGithubPullRequestReviewers } from "~/hooks/api/useGithubPullRequestReviewers.ts";
+import { aggregateRepositoryData } from "~/util/aggregateRepositoryData.ts";
 
 type Props = {
   repositories: Repository;
@@ -16,26 +16,8 @@ export default function GithubPullRequestFrequencyPage(
   );
   const loaded = alldata.every(({ data }) => !!data);
   if (!loaded) return null;
-
-  const pullRequests = alldata.map(prop("data")).reduce(
-    (all, { pullRequests }) => [...all, ...pullRequests],
-    [],
-  );
-  const reviews = alldata.map(prop("data")).reduce(
-    (all, { reviews }) => [...all, ...reviews],
-    [],
-  );
-  const requestedReviewers = alldata.map(prop("data")).reduce(
-    (all, { requestedReviewers }) => [...all, ...requestedReviewers],
-    [],
-  );
-  const users = uniqBy(
-    prop("login"),
-    alldata.map(prop("data")).reduce(
-      (all, { users }) => [...all, ...users],
-      [],
-    ),
-  );
+  const { pullRequests, reviews, requestedReviewers, users } =
+    aggregateRepositoryData(alldata);
 
   return (
     <Movable>
