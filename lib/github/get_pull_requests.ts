@@ -106,7 +106,7 @@ export async function getPullRequests(
               [typenameIs("User"), ({ login }: User) => [login]],
               [
                 typenameIs("Team"),
-                ({ members }: any) => members.nodes.map("login"),
+                ({ members }: any) => members.nodes.map(prop("login")),
               ],
             ]),
           ),
